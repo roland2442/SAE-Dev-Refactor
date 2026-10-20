@@ -7,7 +7,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -58,7 +57,6 @@ public class Controller implements Initializable {
     private Timeline gameLoop;
     private Environnement env;
     private String tourAcheteeEnCours = null; // Stocke l'action actuelle ("VENDRE", "AMELIORER" ou le type de tour)
-    private int derniereVagueAffichee = 0;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -80,7 +78,7 @@ public class Controller implements Initializable {
 
     // Centralisation de la configuration de la partie
     private void initJeu() {
-        this.entiteVue = new EntiteVue();
+        this.entiteVue = new EntiteVue(this.panneauJeu);
 
         
         this.initEcouteurs();
@@ -132,92 +130,74 @@ public class Controller implements Initializable {
         this.initAnimation();
     }
 
-    // Configuration des écouteurs de listes pour l'affichage dynamique 
+    // Configuration de l'affichage dynamique : c'est le modèle qui prévient, le contrôleur ne surveille plus
     private void initEcouteurs() {
-        // Gestionnaire d'affichage des zombies (Ajout / Suppression dans le panneau)
+        this.initAffichageZombies();
+        this.initAffichageTours();
+        this.initAffichageProjectiles();
+        this.initAffichageObjets();
+        this.initFinDePartie();
+        this.initAnnonceVague();
+    }
+
+    // Affichage dynamique des entités : le contrôleur prévient la vue, c'est elle qui affiche
+    private void initAffichageZombies() {
         this.env.getZombies().addListener((ListChangeListener<Enemie>) change -> {
             while (change.next()) {
-                if (change.wasAdded()) {
-                    for (Enemie nouveauZombie : change.getAddedSubList()) {
-                        // Création de l'image via la vue
-                        ImageView iv = this.entiteVue.creerImageZombie(nouveauZombie.getIdentite(), nouveauZombie.getIdUnique());
-                        if (iv != null) {
-                            // Liaison des coordonnées View <-> Model (Property Binding)
-                            iv.layoutXProperty().bind(nouveauZombie.xProperty());
-                            iv.layoutYProperty().bind(nouveauZombie.yProperty());
-                            // Ajout physique à l'écran
-                            this.panneauJeu.getChildren().add(iv);
-                        }
-                    }
-                }
-                if (change.wasRemoved()) {
-                    for (Enemie zombieMort : change.getRemoved()) {
-                        // Recherche de l'image par son ID unique pour la supprimer
-                        Node imgView = this.panneauJeu.lookup("#" + zombieMort.getIdUnique());
-                        if (imgView != null) {
-                            this.panneauJeu.getChildren().remove(imgView);
-                        }
-                    }
-                }
+                for (Enemie zombie : change.getAddedSubList()) this.entiteVue.ajouterZombie(zombie);
+                for (Enemie zombie : change.getRemoved()) this.entiteVue.retirer(zombie.getIdUnique());
             }
         });
+    }
 
-        // Gestionnaire d'affichage des tours posées, vendues et améliorées
+    private void initAffichageTours() {
         this.env.getTours().addListener((ListChangeListener<Tour>) change -> {
             while (change.next()) {
-                if (change.wasAdded()) {
-                    for (Tour nouvelleTour : change.getAddedSubList()) {
-                        // Sécurité pour éviter les doublons d'affichage
-                        if (this.panneauJeu.lookup("#" + nouvelleTour.getIdUnique()) != null) continue;
-                        
-                        // Création du Node (VBox avec image + label niveau)
-                        // On extrait uniquement les primitives / propriétés observables pour la vue
-                        Node iv = this.entiteVue.creerImageTour(
-                                nouvelleTour.getIdentite(),
-                                nouvelleTour.getIdUnique(),
-                                nouvelleTour.niveauProperty() // MVC : On passe la propriété, pas la valeur fixe
-                        );
-
-                        if (iv != null) {
-                            iv.layoutXProperty().bind(nouvelleTour.xProperty());
-                            iv.layoutYProperty().bind(nouvelleTour.yProperty());
-                            this.panneauJeu.getChildren().add(iv);
-                        }
-                    }
-                }
-                if (change.wasRemoved()) {
-                    for (Tour tourRetiree : change.getRemoved()) {
-                        Node imgView = this.panneauJeu.lookup("#" + tourRetiree.getIdUnique());
-                        if (imgView != null) {
-                            this.panneauJeu.getChildren().remove(imgView);
-                        }
-                    }
-                }
+                for (Tour tour : change.getAddedSubList()) this.entiteVue.ajouterTour(tour);
+                for (Tour tour : change.getRemoved()) this.entiteVue.retirer(tour.getIdUnique());
             }
         });
+    }
 
-        // Gestionnaire d'affichage des projectiles
+    private void initAffichageProjectiles() {
         this.env.getProjectiles().addListener((ListChangeListener<Projectile>) change -> {
             while (change.next()) {
-                if (change.wasAdded()) {
-                    for (Projectile nouveauProj : change.getAddedSubList()) {
-                        ImageView iv = this.entiteVue.creerImageProjectile(nouveauProj.getIdentite(), nouveauProj.getIdUnique());
-                        if (iv != null) {
-                            iv.layoutXProperty().bind(nouveauProj.xProperty());
-                            iv.layoutYProperty().bind(nouveauProj.yProperty());
-                            this.panneauJeu.getChildren().add(iv);
-                        }
-                    }
-                }
-                if (change.wasRemoved()) {
-                    for (Projectile projDetruit : change.getRemoved()) {
-                        Node imgView = this.panneauJeu.lookup("#" + projDetruit.getIdUnique());
-                        if (imgView != null) {
-                            this.panneauJeu.getChildren().remove(imgView);
-                        }
-                    }
-                }
+                for (Projectile p : change.getAddedSubList()) this.entiteVue.ajouterProjectile(p);
+                for (Projectile p : change.getRemoved()) this.entiteVue.retirer(p.getIdUnique());
             }
+        });
+    }
+
+    private void initAffichageObjets() {
+        this.env.getObjets().addListener((ListChangeListener<Objet>) change -> {
+            while (change.next()) {
+                for (Objet objet : change.getAddedSubList()) this.faireApparaitreObjet(objet);
+                for (Objet objet : change.getRemoved()) this.entiteVue.retirer(objet.getIdUnique());
+            }
+        });
+    }
+
+    // Le clic sur l'image du bonus appelle ramasser(), puis le modèle retire l'objet de la liste
+    private void faireApparaitreObjet(Objet objet) {
+        ImageView image = this.entiteVue.ajouterObjet(objet);
+        image.setOnMouseClicked(event -> objet.ramasser());
+    }
+
+    // Fin de partie : le modèle expose l'état, le contrôleur réagit
+    private void initFinDePartie() {
+        this.env.defaiteProperty().addListener((observable, ancienne, perdu) -> {
+            if (perdu) this.afficherDefaite();
+        });
+        this.env.victoireProperty().addListener((observable, ancienne, gagne) -> {
+            if (gagne) this.afficherVictoire();
+        });
+    }
+
+    // Changement de vague : annonce + décompte
+    private void initAnnonceVague() {
+        this.env.numeroVagueProperty().addListener((observable, ancienne, nouvelle) -> {
+            this.afficherAnnonceVague(nouvelle.intValue()); // Pause + Décompte visuel
+            this.flouter(true);
         });
     }
 
@@ -228,82 +208,23 @@ public class Controller implements Initializable {
 
         KeyFrame kf = new KeyFrame(
                 Duration.seconds(0.017), // Environ 60 FPS
-                ev -> {
-                    //Mise à jour Logique du Modèle
-                    this.env.unTourDeJeu();
-
-                    //Gestion spécifique de l'Objet au Sol (Rouleau)
-                    Objet obj = this.env.getObjdrop();
-                    // Si un objet logique existe, n'est pas encore affiché et n'est pas ramassé
-                    if (obj != null && !obj.isDejaAffiche() && !obj.isRamasse()){
-                        faireApparaitreObjet(obj); // On crée son ImageView
-                        obj.setDejaAffiche(true);  // Sécurité pour ne pas recréer l'image au prochain tick
-                    }
-
-                    //Gestion des États de Jeu (Game Over, Win, Vagues)
-
-                    // Condition de défaite
-                    if (this.env.getBase() != null && this.env.getBase().estDetruit()) {
-                        this.gameLoop.stop();
-                        this.labelVague.textProperty().unbind(); // On coupe le lien
-                        this.labelVague.setText("GAME OVER !");
-                        if (this.gameOverLabel != null) this.gameOverLabel.setVisible(true);
-                        flouter(true); // Effet visuel
-                    }
-
-                    // Condition de Victoire
-                    if (this.env.toutesVaguesTerminees()) {
-                        this.gameLoop.stop();
-                        if (this.winLabel != null) this.winLabel.setVisible(true);
-                        flouter(true);
-                    }
-
-                    // Détection de Changement de vague (Annonces)
-                    if (this.env.getNumeroVague() != derniereVagueAffichee) {
-                        derniereVagueAffichee = this.env.getNumeroVague();
-                        afficherAnnonceVague(derniereVagueAffichee); // Pause + Décompte visuel
-                        flouter(true);
-                    }
-                }
+                ev -> this.env.unTourDeJeu() // Mise à jour logique du modèle, il prévient lui-même des changements
         );
         this.gameLoop.getKeyFrames().add(kf);
     }
 
-    
-     //Crée et gère l'ImageView physique de l'objet au sol.
-     //Inclut la gestion du clic pour le ramassage.
-      public void faireApparaitreObjet(Objet objet){
-        // Récupération de l'image préchargée
-        ImageView vueObjet = new ImageView(GestionImage.getImage("Rouleau"));
-
-        // Taille visuelle
-        vueObjet.setFitWidth(30);
-        vueObjet.setFitHeight(30);
-
-        // Positionnement physique initial (pas de binding ici car on le supprime au clic)
-        vueObjet.setTranslateX(objet.getX());
-        vueObjet.setTranslateY(objet.getY());
-
-        // Gestionnaire de CLIC sur l'objet 
-        vueObjet.setOnMouseClicked(event -> {
-            objet.ramasser(); // Action logique sur le modèle
-            this.panneauJeu.getChildren().remove(vueObjet); // Action physique sur la vue
-        });
-
-        // Ajout physique au panneau de jeu
-        this.panneauJeu.getChildren().add(vueObjet);
-    }
 
     //Actions UI (Boutons, Clics)
 
     @FXML
     public void lancerJeu(ActionEvent event) {
-        if (this.gameLoop != null && this.gameLoop.getStatus() != Timeline.Status.RUNNING) {
-            // Si la partie n'a pas commencé, on prépare la vague 1
+        if (this.gameLoop == null || this.env.isPartieTerminee()) return; // pas de boucle, ou partie finie
+        if (this.gameLoop.getStatus() != Timeline.Status.RUNNING) {
+            // La boucle doit tourner AVANT de préparer la vague 1 : l'annonce de vague la met en pause
+            this.gameLoop.play();
             if (this.env.getNumeroVague() == 0) {
                 this.env.preparerNouvelleVague();
             }
-            this.gameLoop.play();
         }
     }
 
@@ -331,7 +252,6 @@ public class Controller implements Initializable {
 
         //Reset des variables d'état du contrôleur
         this.tourAcheteeEnCours = null;
-        this.derniereVagueAffichee = 0;
 
         //Reset UI d'état (cachées)
         if (this.gameOverLabel != null) this.gameOverLabel.setVisible(false);
@@ -455,7 +375,22 @@ public class Controller implements Initializable {
 
     
 
-    
+    // Affichage de la défaite (appelé quand le modèle passe defaite à vrai)
+    private void afficherDefaite() {
+        this.gameLoop.stop();
+        this.labelVague.textProperty().unbind(); // On coupe le lien
+        this.labelVague.setText("GAME OVER !");
+        if (this.gameOverLabel != null) this.gameOverLabel.setVisible(true);
+        flouter(true); // Effet visuel
+    }
+
+    // Affichage de la victoire (appelé quand le modèle passe victoire à vrai)
+    private void afficherVictoire() {
+        this.gameLoop.stop();
+        if (this.winLabel != null) this.winLabel.setVisible(true);
+        flouter(true);
+    }
+
      // Affiche l'annonce textuelle et fait le décompte visuel avant la vague.
      //Met le jeu en pause.
     
