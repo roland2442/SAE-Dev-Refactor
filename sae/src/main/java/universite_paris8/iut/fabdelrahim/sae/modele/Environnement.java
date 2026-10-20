@@ -31,10 +31,13 @@ public class Environnement {
     private final ObservableList<Tour> tours;
     private final ObservableList<Enemie> zombies;
     private final ObservableList<Projectile> projectiles;
+    private final ObservableList<Objet> objets; // objets bonus posés au sol
 
     private final IntegerProperty argent;
     private final IntegerProperty numeroVague;
     private final BooleanProperty vagueEnCours;
+    private final BooleanProperty defaite;
+    private final BooleanProperty victoire;
 
     private final IntegerProperty tempsbonus;
 
@@ -44,17 +47,20 @@ public class Environnement {
     private int tempsAvantProchaineVague;
     private int compteurToursSurChemin = 0;
 
-    private Objet objdrop = null;
+    private Objet bonusActif = null; // objet ramassé dont l'effet est en cours
 
     public Environnement() {
         this.terrain = new Terrain();
         this.tours = FXCollections.observableArrayList();
         this.zombies = FXCollections.observableArrayList();
         this.projectiles = FXCollections.observableArrayList();
+        this.objets = FXCollections.observableArrayList();
 
         this.argent = new SimpleIntegerProperty(ArgentDepart);
         this.numeroVague = new SimpleIntegerProperty(0);
         this.vagueEnCours = new SimpleBooleanProperty(false);
+        this.defaite = new SimpleBooleanProperty(false);
+        this.victoire = new SimpleBooleanProperty(false);
         this.tempsbonus = new SimpleIntegerProperty(0);
         this.temps = 0;
 
@@ -150,10 +156,32 @@ public class Environnement {
         mettreAJourProjectiles();
         mettreAJourZombies();
         gererTransitionVague();
+        gererBonusActif();
+        verifierFinDePartie();
+    }
 
-        if (objdrop != null) {
-            objdrop.agir();
+    private void gererBonusActif() {
+        if (bonusActif == null) return;
+
+        bonusActif.agir();
+        if (getTempsbonus() == 0) {
+            bonusActif = null;
         }
+    }
+
+    private void verifierFinDePartie() {
+        if (isPartieTerminee()) return;
+
+        if (base != null && base.estDetruit()) {
+            defaite.set(true);
+        } else if (toutesVaguesTerminees()) {
+            victoire.set(true);
+        }
+    }
+
+    public void objetRamasse(Objet objet) {
+        objets.remove(objet);
+        bonusActif = objet;
     }
 
     private void gererAparition() {
@@ -210,8 +238,9 @@ public class Environnement {
                 }
             }
 
-            if (z.estMort() && this.objdrop == null && Objet.lacher()) {
-                this.objdrop = new Objet(z.getX(), z.getY(), this);
+            // Un  bonus à la fois : rien au sol et aucun effet en cours
+            if (z.estMort() && this.objets.isEmpty() && this.bonusActif == null && Objet.lacher()) {
+                this.objets.add(new Objet(z.getX(), z.getY(), this));
             }
 
             if (z.estMort() || z.estArrive()) {
@@ -339,6 +368,7 @@ public class Environnement {
     public ObservableList<Enemie> getZombies() { return zombies; }
     public ObservableList<Tour> getTours() { return tours; }
     public ObservableList<Projectile> getProjectiles() { return this.projectiles; }
+    public ObservableList<Objet> getObjets() { return this.objets; }
     public Terrain getTerrain() { return terrain; }
     public Comptoir getBase() { return base; }
 
@@ -349,7 +379,9 @@ public class Environnement {
     public IntegerProperty numeroVagueProperty() { return numeroVague; }
     public BooleanProperty vagueEnCoursProperty() { return vagueEnCours; }
 
-    public Objet getObjdrop() { return this.objdrop; }
+    public BooleanProperty defaiteProperty() { return defaite; }
+    public BooleanProperty victoireProperty() { return victoire; }
+    public boolean isPartieTerminee() { return defaite.get() || victoire.get(); }
 
     public IntegerProperty tempsbonusProperty() { return this.tempsbonus; }
     public int getTempsbonus() { return this.tempsbonus.get(); }
