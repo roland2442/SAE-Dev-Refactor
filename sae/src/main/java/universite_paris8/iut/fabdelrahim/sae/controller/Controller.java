@@ -34,7 +34,7 @@ import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
 
-    
+
     @FXML private TilePane map;
     @FXML private Pane panneauJeu;
     @FXML private Label labelArgent;
@@ -80,7 +80,7 @@ public class Controller implements Initializable {
     private void initJeu() {
         this.entiteVue = new EntiteVue(this.panneauJeu);
 
-        
+
         this.initEcouteurs();
 
         // Affichage du comptoir de départ
@@ -274,11 +274,11 @@ public class Controller implements Initializable {
         }
     }
 
-    
+
 
     @FXML
     public void reglage(ActionEvent event) throws IOException {
-        if (gameLoop != null) gameLoop.stop(); 
+        if (gameLoop != null) gameLoop.stop();
 
         Stage stage = new Stage();
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/universite_paris8/iut/fabdelrahim/sae/reglage.fxml"));
@@ -317,7 +317,7 @@ public class Controller implements Initializable {
         }
     }
 
-    
+
     @FXML
     public void clicBoutonMitrailletteFrite(ActionEvent event) {
         this.tourAcheteeEnCours = "MitrailletteFrite";
@@ -373,7 +373,6 @@ public class Controller implements Initializable {
         this.tourAcheteeEnCours = null;
     }
 
-    
 
     // Affichage de la défaite (appelé quand le modèle passe defaite à vrai)
     private void afficherDefaite() {
@@ -391,9 +390,9 @@ public class Controller implements Initializable {
         flouter(true);
     }
 
-     // Affiche l'annonce textuelle et fait le décompte visuel avant la vague.
-     //Met le jeu en pause.
-    
+    // Affiche l'annonce textuelle et fait le décompte visuel avant la vague.
+    //Met le jeu en pause.
+
     private void afficherAnnonceVague(int numeroVague) {
         // Pause Logique
         if (this.gameLoop != null) {
@@ -430,9 +429,8 @@ public class Controller implements Initializable {
         disparition.play();
     }
 
-    
-     //Applique ou désactive un effet de flou sur le panneau de jeu.
-     private void flouter(boolean actif) {
+
+    private void flouter(boolean actif) {
         if (actif) {
             map.setEffect(new GaussianBlur(10));
             panneauJeu.setEffect(new GaussianBlur(10));

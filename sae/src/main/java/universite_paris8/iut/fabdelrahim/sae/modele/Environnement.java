@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import universite_paris8.iut.fabdelrahim.sae.modele.Apparition.*;
 import universite_paris8.iut.fabdelrahim.sae.modele.Chemin.Bfs;
 import universite_paris8.iut.fabdelrahim.sae.modele.Chemin.Point;
 import universite_paris8.iut.fabdelrahim.sae.modele.Chemin.Terrain;
@@ -43,6 +44,7 @@ public class Environnement {
 
     private int temps;
     private int zombiesRestantsASpawner;
+    private StrategieApparition strategieApparition = new ApparitionNormale();
     private int delaiAvantProchainZombie;
     private int tempsAvantProchaineVague;
     private int compteurToursSurChemin = 0;
@@ -81,6 +83,7 @@ public class Environnement {
 
     public void preparerNouvelleVague() {
         numeroVague.set(getNumeroVague() + 1);
+        strategieApparition = choisirStrategie(getNumeroVague());
         vagueEnCours.set(true);
         if (getNumeroVague() < NombreVaguesMax) {
             zombiesRestantsASpawner = 10 * getNumeroVague();
@@ -160,6 +163,7 @@ public class Environnement {
         verifierFinDePartie();
     }
 
+    // L'effet du bonus ramassé diminue à chaque tour, puis un nouveau bonus pourra tomber
     private void gererBonusActif() {
         if (bonusActif == null) return;
 
@@ -169,6 +173,7 @@ public class Environnement {
         }
     }
 
+    // Le modèle décide lui-même si la partie est finie, le contrôleur est prévenu par les propriétés
     private void verifierFinDePartie() {
         if (isPartieTerminee()) return;
 
@@ -179,6 +184,7 @@ public class Environnement {
         }
     }
 
+    // Appelé par Objet quand le joueur le ramasse : il quitte le sol mais son effet continue
     public void objetRamasse(Objet objet) {
         objets.remove(objet);
         bonusActif = objet;
@@ -238,7 +244,7 @@ public class Environnement {
                 }
             }
 
-            // Un  bonus à la fois : rien au sol et aucun effet en cours
+            // Un seul bonus à la fois : rien au sol et aucun effet en cours
             if (z.estMort() && this.objets.isEmpty() && this.bonusActif == null && Objet.lacher()) {
                 this.objets.add(new Objet(z.getX(), z.getY(), this));
             }
@@ -276,40 +282,17 @@ public class Environnement {
         int pixelX = (int) (depart.y * TailleCase);
         int pixelY = (int) (depart.x * TailleCase);
 
-        Enemie zombie = creerZombieSelonVague(pixelX, pixelY);
+        Enemie zombie = strategieApparition.creerZombie(pixelX, pixelY, zombiesRestantsASpawner, Math.random());
         zombie.setChemin(chemin);
         zombies.add(zombie);
     }
 
-    // Algorithme de sélection probabiliste et cyclique des types d'ennemis selon la difficulté
-    private Enemie creerZombieSelonVague(int x, int y) {
-        int vague = getNumeroVague();
-        double hasard = Math.random();
-
-        if (vague == NombreVaguesMax) {
-            if (zombiesRestantsASpawner == 25) return new Boss(x, y);
-            if (hasard < 0.20) return new ZombieGros(x, y);
-            if (hasard < 0.40) return new ZombieFamille(x, y);
-            if (hasard < 0.50) return new ZombieRapide(x, y);
-            if (hasard < 0.55) return new ZombieNormal(x, y);
-        }
-
-        if (vague >= 5) {
-            if (hasard < 0.20) return new ZombieGros(x, y);
-            if (hasard < 0.40) return new ZombieFamille(x, y);
-            if (hasard < 0.70) return new ZombieRapide(x, y);
-            return new ZombieNormal(x, y);
-        }
-        if (vague >= 3) {
-            if (zombiesRestantsASpawner % 4 == 0) return new ZombieGros(x, y);
-            if (zombiesRestantsASpawner % 3 == 0) return new ZombieRapide(x, y);
-            return new ZombieNormal(x, y);
-        }
-        if (vague >= 2) {
-            if (zombiesRestantsASpawner % 3 == 0) return new ZombieRapide(x, y);
-            return new ZombieNormal(x, y);
-        }
-        return new ZombieNormal(x, y);
+    private StrategieApparition choisirStrategie(int vague) {
+        if (vague == NombreVaguesMax) return new ApparitionFinale();
+        if (vague >= 5) return new ApparitionAleatoire();
+        if (vague >= 3) return new ApparitionGros();
+        if (vague >= 2) return new ApparitionRapide();
+        return new ApparitionNormale();
     }
 
     public void vendreTour(int pixelX, int pixelY) {
