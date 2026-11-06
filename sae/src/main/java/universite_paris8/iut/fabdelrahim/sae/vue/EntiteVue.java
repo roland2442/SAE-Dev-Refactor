@@ -7,6 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import universite_paris8.iut.fabdelrahim.sae.modele.Objet;
 import universite_paris8.iut.fabdelrahim.sae.modele.Projectiles.Projectile;
@@ -17,10 +18,12 @@ import java.net.URL;
 
 public class EntiteVue {
 
-    private final Pane panneauJeu;
+    private Pane panneauJeu;
+    private TilePane map;
 
-    public EntiteVue(Pane panneauJeu) {
+    public EntiteVue(Pane panneauJeu, TilePane map) {
         this.panneauJeu = panneauJeu;
+        this.map = map;
     }
 
     // ---------- Ajout / retrait des entités dans le panneau de jeu ----------
@@ -101,6 +104,8 @@ public class EntiteVue {
 
 
     public VBox creerImageTour(String identite, String idUnique, IntegerProperty niveauProperty) {
+        if (this.panneauJeu.lookup("#" + idUnique) != null) return null;
+
         try {
             URL fxmlUrl = getClass().getResource("/universite_paris8/iut/fabdelrahim/sae/barreniv.fxml");
             if (fxmlUrl == null) return null;
@@ -130,6 +135,7 @@ public class EntiteVue {
         }
     }
 
+
     public ImageView creerImageComptoir(String identite, int x, int y) {
         Image img = GestionImage.getImage(identite);
         if (img == null) return null;
@@ -142,4 +148,23 @@ public class EntiteVue {
 
         return imageComptoir;
     }
+
+    public void afficherComptoir(String identite, int x, int y) {
+        Image img = GestionImage.getImage(identite);
+        if (img == null) return;
+
+        ImageView imageComptoir = new ImageView(img);
+        imageComptoir.setFitWidth(36);
+        imageComptoir.setFitHeight(36);
+        imageComptoir.setLayoutX(x);
+        imageComptoir.setLayoutY(y);
+
+        this.panneauJeu.getChildren().add(imageComptoir);
+    }
+    public void viderPanneauJeu() {
+        if (this.panneauJeu != null) {
+            this.panneauJeu.getChildren().clear();
+        }
+    }
+
 }
