@@ -7,7 +7,7 @@ import java.util.List;
 public class Barbecue extends Tour {
 
     public Barbecue(int x, int y) {
-        super(x, y, 20, 1, 12, "Barbecue");
+        super(x, y, 20, 1, 12, TypeTour.BARBECUE);
     }
 
     @Override

@@ -93,7 +93,7 @@ public class Environnement {
         }
     }
 
-    public void ajouterTour(int pixelX, int pixelY, String type) {
+    public void ajouterTour(int pixelX, int pixelY, TypeTour type) {
         int ligne = pixelY / TailleCase;
         int colonne = pixelX / TailleCase;
         int idTuile = terrain.grille[ligne][colonne];
@@ -104,9 +104,8 @@ public class Environnement {
             }
         }
 
-        boolean estTourSpeciale = type.equals("BacGlace") || type.equals("Barbecue");
 
-        if (estTourSpeciale) {
+        if (type.estPoseSurChemin()) {
             // Les tours de type zone/ralentissement se placent sur le chemin (id 1 ou 100), max 6 au total
             if (idTuile == 1 || idTuile == 100) {
                 if (compteurToursSurChemin >= 6) return;
@@ -117,36 +116,26 @@ public class Environnement {
             if (idTuile != 0) return;
         }
 
-        int cout = coutTour(type);
+        int cout = type.getPrix();
         if (!payerAchat(cout)) return;
 
         Tour nouvelleTour = creerTour(pixelX, pixelY, type);
-        if (nouvelleTour != null) {
-            tours.add(nouvelleTour);
-            if (idTuile == 1 || idTuile == 100) {
-                compteurToursSurChemin++;
-            }
+        tours.add(nouvelleTour);
+        if (idTuile == 1 || idTuile == 100) {
+            compteurToursSurChemin++;
         }
+
     }
 
-    private int coutTour(String type) {
-        switch (type) {
-            case "LanceBurger": return 200;
-            case "MitrailletteFrite": return 100;
-            case "BacGlace": return 150;
-            case "Barbecue": return 250;
-            default: return 100;
-        }
-    }
 
-    private Tour creerTour(int x, int y, String type) {
-        switch (type) {
-            case "LanceBurger": return new LanceBurger(x, y);
-            case "MitrailletteFrite": return new MitrailletteFrite(x, y);
-            case "BacGlace": return new BacGlace(x, y);
-            case "Barbecue": return new Barbecue(x, y);
-            default: return new MitrailletteFrite(x, y);
-        }
+
+    private Tour creerTour(int x, int y, TypeTour type) {
+        return switch (type) {
+            case LANCE_BURGER -> new LanceBurger(x, y);
+            case MITRAILLETTE_FRITE -> new MitrailletteFrite(x, y);
+            case BAC_GLACE -> new BacGlace(x, y);
+            case BARBECUE -> new Barbecue(x, y);
+        };
     }
 
     public void unTourDeJeu() {
@@ -305,8 +294,7 @@ public class Environnement {
         }
 
         if (tourATrouver != null) {
-            String type = tourATrouver.getIdentite();
-            int prixDeBase = coutTour(type);
+            int prixDeBase = tourATrouver.getType().getPrix();
             int remboursement = prixDeBase / 2;
 
             argent.set(getArgent() + remboursement);

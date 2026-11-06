@@ -7,7 +7,7 @@ import java.util.List;
 public class BacGlace extends Tour {
 
     public BacGlace(int x, int y) {
-        super(x, y, 50, 0, 12, "BacGlace");
+        super(x, y, 50, 0, 12, TypeTour.BAC_GLACE);
     }
 
     @Override

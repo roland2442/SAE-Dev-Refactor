@@ -27,6 +27,7 @@ import universite_paris8.iut.fabdelrahim.sae.vue.EcranVue;
 import universite_paris8.iut.fabdelrahim.sae.vue.TerrainVue;
 import universite_paris8.iut.fabdelrahim.sae.vue.EntiteVue;
 import universite_paris8.iut.fabdelrahim.sae.vue.GestionImage;
+import universite_paris8.iut.fabdelrahim.sae.modele.Tours.TypeTour;
 
 import java.io.IOException;
 import java.net.URL;
@@ -55,7 +56,8 @@ public class Controller implements Initializable {
     private EcranVue ecranVue;
     private Timeline gameLoop;
     private Environnement env;
-    private String tourAcheteeEnCours = null; // Stocke l'action actuelle ("VENDRE", "AMELIORER" ou le type de tour)
+    private ActionJoueur action = ActionJoueur.AUCUNE;
+    private TypeTour tourChoisie = null;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -239,7 +241,8 @@ public class Controller implements Initializable {
             this.terrainVue.creerTerrain();
         }
 
-        this.tourAcheteeEnCours = null;
+        this.action = ActionJoueur.AUCUNE;
+        this.tourChoisie = null;
 
         if (this.gameOverLabel != null) this.gameOverLabel.setVisible(false);
         if (this.winLabel != null) this.winLabel.setVisible(false);
@@ -298,53 +301,53 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    public void clicBoutonMitrailletteFrite(ActionEvent event) {
-        this.tourAcheteeEnCours = "MitrailletteFrite";
-    }
+    public void clicBoutonMitrailletteFrite(ActionEvent event) { choisirTour(TypeTour.MITRAILLETTE_FRITE); }
 
     @FXML
-    public void clicBoutonLanceBurger(ActionEvent event) {
-        this.tourAcheteeEnCours = "LanceBurger";
-    }
+    public void clicBoutonLanceBurger(ActionEvent event) { choisirTour(TypeTour.LANCE_BURGER); }
 
     @FXML
-    public void clicBoutonBacGlace(ActionEvent event) {
-        this.tourAcheteeEnCours = "BacGlace";
-    }
+    public void clicBoutonBacGlace(ActionEvent event) { choisirTour(TypeTour.BAC_GLACE); }
 
     @FXML
-    public void clicBoutonBarbecue(ActionEvent event) {
-        this.tourAcheteeEnCours = "Barbecue";
-    }
+    public void clicBoutonBarbecue(ActionEvent event) { choisirTour(TypeTour.BARBECUE); }
 
     @FXML
     public void vendreT(ActionEvent event) {
-        this.tourAcheteeEnCours = "VENDRE";
+        this.action = ActionJoueur.VENDRE;
+        this.tourChoisie = null;
         System.out.println("Mode vente activé : cliquez sur une tour pour la revendre.");
     }
 
     @FXML
     public void ameliorerT(ActionEvent event) {
-        this.tourAcheteeEnCours = "AMELIORER";
+        this.action = ActionJoueur.AMELIORER;
+        this.tourChoisie = null;
         System.out.println("Mode amélioration activé : cliquez sur une tour pour augmenter ses stats.");
     }
 
+    private void choisirTour(TypeTour type) {
+        this.action = ActionJoueur.POSER;
+        this.tourChoisie = type;
+    }
+
+    // Gestion de l'action sur le terrain (Clic de souris)
     @FXML
     public void clicSurTerrain(MouseEvent event) {
-        if (this.tourAcheteeEnCours == null) return;
+        if (this.action == ActionJoueur.AUCUNE) return;
 
         int xAjuste = ((int) event.getX() / 36) * 36;
         int yAjuste = ((int) event.getY() / 36) * 36;
 
-        if (this.tourAcheteeEnCours.equals("VENDRE")) {
-            this.env.vendreTour(xAjuste, yAjuste);
-        } else if (this.tourAcheteeEnCours.equals("AMELIORER")) {
-            this.env.ameliorerTour(xAjuste, yAjuste);
-        } else {
-            this.env.ajouterTour(xAjuste, yAjuste, this.tourAcheteeEnCours);
+        switch (this.action) {
+            case VENDRE -> this.env.vendreTour(xAjuste, yAjuste);
+            case AMELIORER -> this.env.ameliorerTour(xAjuste, yAjuste);
+            case POSER -> this.env.ajouterTour(xAjuste, yAjuste, this.tourChoisie);
+            default -> { }
         }
 
-        this.tourAcheteeEnCours = null;
+        this.action = ActionJoueur.AUCUNE;
+        this.tourChoisie = null;
     }
 
     // Affichage de la défaite (appelé quand le modèle passe defaite à vrai)

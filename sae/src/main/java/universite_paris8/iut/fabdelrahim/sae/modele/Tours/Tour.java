@@ -1,9 +1,8 @@
 package universite_paris8.iut.fabdelrahim.sae.modele.Tours;
 
-import universite_paris8.iut.fabdelrahim.sae.modele.Projectiles.Frites;
+
 import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
 import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
-import universite_paris8.iut.fabdelrahim.sae.modele.Projectiles.Burger;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -17,20 +16,20 @@ public class Tour {
     protected int degats;
     protected int cooldown;
     protected int vitesseTir;
-    protected String identite;
+    protected TypeTour type;
     protected IntegerProperty niveau;
 
     private static int compteur = 0;
     private String idUnique;
 
-    public Tour(int x, int y, int portee, int degats, int vitesseTir, String identite) {
+    public Tour(int x, int y, int portee, int degats, int vitesseTir, TypeTour type) {
         this.x = new SimpleIntegerProperty(x);
         this.y = new SimpleIntegerProperty(y);
         this.portee = portee;
         this.degats = degats;
         this.cooldown = 0;
         this.vitesseTir = vitesseTir;
-        this.identite = identite;
+        this.type = type;
         this.idUnique = "tour_" + compteur++;
         this.niveau = new SimpleIntegerProperty(1);
     }
@@ -43,18 +42,10 @@ public class Tour {
         this.vitesseTir = (int) (this.vitesseTir * 0.75); 
     }
 
-    // Calcule le coût selon le type et le niveau visé
+
     public int getPrixAmelioration() {
-        int coutBase;
-        switch (this.identite) {
-            case "LanceBurger": coutBase = 200; break;
-            case "MitrailletteFrite": coutBase = 100; break;
-            case "BacGlace": coutBase = 150; break;
-            case "Barbecue": coutBase = 250; break;
-            default: coutBase = 100;
-        }
         // A chaque amélioration, le prix augmente de 100
-        return coutBase + 100 * getNiveau();
+        return this.type.getPrix() + 100 * getNiveau();
     }
 
     public void attaquer(Environnement env) {
@@ -96,31 +87,9 @@ public class Tour {
         }
     }
 
-    /**
-     * Oriente l'action de la tour selon sa nature :
-     * - Crée un projectile mobile pour les tours d'attaque à distance.
-     * - Applique un effet de zone direct pour les pièges environnementaux.
-     */
     protected void gererActionTour(Enemie cible, Environnement env) {
-        // Point de départ centré pour les projectiles visuels (16x16)
-        double departX = this.getX() + 10;
-        double departY = this.getY() + 10;
-
-        if (this.identite.equals("LanceBurger")) {
-            // Le projectile récupère directement les dégâts mis à jour de la tour
-            Burger b = new Burger(departX, departY, cible);
-            b.setDegats(this.degats);
-            env.getProjectiles().add(b);
-        }
-        else if (this.identite.equals("MitrailletteFrite")) {
-            Frites f = new Frites(departX, departY, cible);
-            f.setDegats(this.degats);
-            env.getProjectiles().add(f);
-        }
-        // Pour les pièges au sol (BacGlace, Barbecue), on applique l'effet directement sans projectile volant
-        else {
-            this.appliquerEffetImmediat(cible, env.getZombies());
-        }
+        // Par défaut : effet direct (pièges au sol). Les tours à projectiles redéfinissent cette méthode.
+        this.appliquerEffetImmediat(cible, env.getZombies());
     }
 
     // Comportement vide par défaut pour les tours à projectiles classiques
@@ -137,7 +106,7 @@ public class Tour {
     public IntegerProperty yProperty() { return this.y; }
 
     public String getIdUnique() { return this.idUnique; }
-    public String getIdentite() { return this.identite; }
+    public TypeTour getType() { return this.type; }
 
     public int getNiveau() { return this.niveau.get(); }
     public IntegerProperty niveauProperty() { return this.niveau; }

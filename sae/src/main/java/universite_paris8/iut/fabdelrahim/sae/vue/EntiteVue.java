@@ -13,6 +13,7 @@ import universite_paris8.iut.fabdelrahim.sae.modele.Objet;
 import universite_paris8.iut.fabdelrahim.sae.modele.Projectiles.Projectile;
 import universite_paris8.iut.fabdelrahim.sae.modele.Tours.Tour;
 import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Tours.TypeTour;
 import java.io.IOException;
 import java.net.URL;
 
@@ -48,7 +49,7 @@ public class EntiteVue {
 
     public void ajouterTour(Tour tour) {
         if (panneauJeu.lookup("#" + tour.getIdUnique()) != null) return; // déjà affichée
-        VBox image = creerImageTour(tour.getIdentite(), tour.getIdUnique(), tour.niveauProperty());
+        VBox image = creerImageTour(tour.getType(), tour.getIdUnique(), tour.niveauProperty());
         if (image != null) {
             image.layoutXProperty().bind(tour.xProperty());
             image.layoutYProperty().bind(tour.yProperty());
@@ -102,8 +103,7 @@ public class EntiteVue {
         return imageView;
     }
 
-
-    public VBox creerImageTour(String identite, String idUnique, IntegerProperty niveauProperty) {
+    public VBox creerImageTour(TypeTour type, String idUnique, IntegerProperty niveauProperty) {
         if (this.panneauJeu.lookup("#" + idUnique) != null) return null;
 
         try {
@@ -116,7 +116,7 @@ public class EntiteVue {
             Label labelNiveau = (Label) loader.getNamespace().get("labelNiveau");
             ImageView imageTour = (ImageView) loader.getNamespace().get("imageTour");
 
-            Image img = GestionImage.getImage(identite);
+            Image img = GestionImage.getImage(type);
             if (img != null && imageTour != null) {
                 imageTour.setImage(img);
             }
