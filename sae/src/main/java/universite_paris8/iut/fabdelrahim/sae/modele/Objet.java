@@ -8,15 +8,16 @@ public class Objet {
     private Environnement env;
     private boolean ramasse;
     private int tempseffet;
-    private boolean dejaaffiche;
+    private static int compteur = 0;
+    private final String idUnique;
 
     public Objet(double x, double y, Environnement env){
         this.x=x;
         this.y=y;
         this.env=env;
         this.ramasse=false;
-        this.dejaaffiche= false;
         this.tempseffet=0;
+        this.idUnique = "objet_" + compteur++;
     }
 
     // Drop
@@ -26,11 +27,13 @@ public class Objet {
 
     // Utilisateur clique sur l'item
     public void ramasser(){
+        if (this.ramasse) return; // un objet ne peut être ramassé qu'une fois
         this.ramasse=true;
         this.env.setTempsbonus(600);
         for (Tour tour : this.env.getTours()){
             tour.setDegats((int)(tour.getDegats() * 1.2));//+20% dégâts
         }
+        this.env.objetRamasse(this); // le modèle retire l'objet du sol et suit son effet
     }
 
     // Le temps diminue
@@ -48,6 +51,6 @@ public class Objet {
     public boolean isRamasse() { return this.ramasse; }
     public double getX() { return this.x; }
     public double getY() { return this.y; }
-    public boolean isDejaAffiche() { return this.dejaaffiche; }
-    public void setDejaAffiche(boolean dejaAffiche) { this.dejaaffiche=dejaAffiche; }
+    public String getIdUnique() { return this.idUnique; }
+
 }

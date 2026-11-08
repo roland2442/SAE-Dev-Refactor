@@ -7,7 +7,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -28,6 +27,7 @@ import universite_paris8.iut.fabdelrahim.sae.vue.EcranVue;
 import universite_paris8.iut.fabdelrahim.sae.vue.TerrainVue;
 import universite_paris8.iut.fabdelrahim.sae.vue.EntiteVue;
 import universite_paris8.iut.fabdelrahim.sae.vue.GestionImage;
+import universite_paris8.iut.fabdelrahim.sae.modele.Tours.TypeTour;
 
 import java.io.IOException;
 import java.net.URL;
@@ -56,8 +56,8 @@ public class Controller implements Initializable {
     private EcranVue ecranVue;
     private Timeline gameLoop;
     private Environnement env;
-    private String tourAcheteeEnCours = null;
-    private int derniereVagueAffichee = 0;
+    private ActionJoueur action = ActionJoueur.AUCUNE;
+    private TypeTour tourChoisie = null;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -123,138 +123,102 @@ public class Controller implements Initializable {
         this.initAnimation();
     }
 
+    // Configuration de l'affichage dynamique : c'est le modèle qui prévient, le contrôleur ne surveille plus
     private void initEcouteurs() {
-        // Zombies
+        this.initAffichageZombies();
+        this.initAffichageTours();
+        this.initAffichageProjectiles();
+        this.initAffichageObjets();
+        this.initFinDePartie();
+        this.initAnnonceVague();
+    }
+
+    // Affichage dynamique des entités : le contrôleur prévient la vue, c'est elle qui affiche
+    private void initAffichageZombies() {
         this.env.getZombies().addListener((ListChangeListener<Enemie>) change -> {
             while (change.next()) {
-                if (change.wasAdded()) {
-                    for (Enemie nouveauZombie : change.getAddedSubList()) {
-                        ImageView iv = this.entiteVue.creerImageZombie(nouveauZombie.getIdentite(), nouveauZombie.getIdUnique());
-                        if (iv != null) {
-                            iv.layoutXProperty().bind(nouveauZombie.xProperty());
-                            iv.layoutYProperty().bind(nouveauZombie.yProperty());
-                        }
-                    }
-                }
-                if (change.wasRemoved()) {
-                    for (Enemie zombieMort : change.getRemoved()) {
-                        this.entiteVue.supprimerEntiteParId(zombieMort.getIdUnique());
-                    }
-                }
-            }
-        });
-
-        // Tours
-        this.env.getTours().addListener((ListChangeListener<Tour>) change -> {
-            while (change.next()) {
-                if (change.wasAdded()) {
-                    for (Tour nouvelleTour : change.getAddedSubList()) {
-                        Node iv = this.entiteVue.creerImageTour(
-                                nouvelleTour.getIdentite(),
-                                nouvelleTour.getIdUnique(),
-                                nouvelleTour.niveauProperty()
-                        );
-                        if (iv != null) {
-                            iv.layoutXProperty().bind(nouvelleTour.xProperty());
-                            iv.layoutYProperty().bind(nouvelleTour.yProperty());
-                        }
-                    }
-                }
-                if (change.wasRemoved()) {
-                    for (Tour tourRetiree : change.getRemoved()) {
-                        this.entiteVue.supprimerEntiteParId(tourRetiree.getIdUnique());
-                    }
-                }
-            }
-        });
-
-        // Projectiles
-        this.env.getProjectiles().addListener((ListChangeListener<Projectile>) change -> {
-            while (change.next()) {
-                if (change.wasAdded()) {
-                    for (Projectile nouveauProj : change.getAddedSubList()) {
-                        ImageView iv = this.entiteVue.creerImageProjectile(nouveauProj.getIdentite(), nouveauProj.getIdUnique());
-                        if (iv != null) {
-                            iv.layoutXProperty().bind(nouveauProj.xProperty());
-                            iv.layoutYProperty().bind(nouveauProj.yProperty());
-                        }
-                    }
-                }
-                if (change.wasRemoved()) {
-                    for (Projectile projDetruit : change.getRemoved()) {
-                        this.entiteVue.supprimerEntiteParId(projDetruit.getIdUnique());
-                    }
-                }
+                for (Enemie zombie : change.getAddedSubList()) this.entiteVue.ajouterZombie(zombie);
+                for (Enemie zombie : change.getRemoved()) this.entiteVue.retirer(zombie.getIdUnique());
             }
         });
     }
 
+    private void initAffichageTours() {
+        this.env.getTours().addListener((ListChangeListener<Tour>) change -> {
+            while (change.next()) {
+                for (Tour tour : change.getAddedSubList()) this.entiteVue.ajouterTour(tour);
+                for (Tour tour : change.getRemoved()) this.entiteVue.retirer(tour.getIdUnique());
+            }
+        });
+    }
+
+    private void initAffichageProjectiles() {
+        this.env.getProjectiles().addListener((ListChangeListener<Projectile>) change -> {
+            while (change.next()) {
+                for (Projectile p : change.getAddedSubList()) this.entiteVue.ajouterProjectile(p);
+                for (Projectile p : change.getRemoved()) this.entiteVue.retirer(p.getIdUnique());
+            }
+        });
+    }
+
+    private void initAffichageObjets() {
+        this.env.getObjets().addListener((ListChangeListener<Objet>) change -> {
+            while (change.next()) {
+                for (Objet objet : change.getAddedSubList()) this.faireApparaitreObjet(objet);
+                for (Objet objet : change.getRemoved()) this.entiteVue.retirer(objet.getIdUnique());
+            }
+        });
+    }
+
+    // Le clic sur l'image du bonus appelle ramasser(), puis le modèle retire l'objet de la liste
+    private void faireApparaitreObjet(Objet objet) {
+        ImageView image = this.entiteVue.ajouterObjet(objet);
+        image.setOnMouseClicked(event -> objet.ramasser());
+    }
+
+    // Fin de partie : le modèle expose l'état, le contrôleur réagit
+    private void initFinDePartie() {
+        this.env.defaiteProperty().addListener((observable, ancienne, perdu) -> {
+            if (perdu) this.afficherDefaite();
+        });
+        this.env.victoireProperty().addListener((observable, ancienne, gagne) -> {
+            if (gagne) this.afficherVictoire();
+        });
+    }
+
+    // Changement de vague : annonce + décompte
+    private void initAnnonceVague() {
+        this.env.numeroVagueProperty().addListener((observable, ancienne, nouvelle) -> {
+            if (this.gameLoop != null) this.gameLoop.pause();
+            // La vue joue le décompte, puis relance la boucle de jeu via l'action donnée
+            this.ecranVue.afficherAnnonceVague(nouvelle.intValue(), () -> {
+                if (this.gameLoop != null) this.gameLoop.play();
+            });
+        });
+    }
+
+    // Boucle principale du jeu (Game Loop)
     private void initAnimation() {
         this.gameLoop = new Timeline();
         this.gameLoop.setCycleCount(Timeline.INDEFINITE);
 
         KeyFrame kf = new KeyFrame(
-                Duration.seconds(0.017),
-                ev -> {
-                    this.env.unTourDeJeu();
-
-                    // Gestion de l'Objet Bonus (Rouleau)
-                    Objet obj = this.env.getObjdrop();
-                    if (obj != null && !obj.isDejaAffiche() && !obj.isRamasse()) {
-                        faireApparaitreObjet(obj);
-                        obj.setDejaAffiche(true);
-                    }
-
-                    // Condition de Défaite
-                    if (this.env.getBase() != null && this.env.getBase().estDetruit()) {
-                        this.gameLoop.stop();
-                        this.labelVague.textProperty().unbind();
-                        this.labelVague.setText("GAME OVER !");
-                        if (this.gameOverLabel != null) this.gameOverLabel.setVisible(true);
-                        this.ecranVue.flouter(true);
-                    }
-
-                    // Condition de Victoire
-                    if (this.env.toutesVaguesTerminees()) {
-                        this.gameLoop.stop();
-                        if (this.winLabel != null) this.winLabel.setVisible(true);
-                        this.ecranVue.flouter(true);
-                    }
-
-                    // Changement de vague (Annonce + Décompte)
-                    if (this.env.getNumeroVague() != derniereVagueAffichee) {
-                        derniereVagueAffichee = this.env.getNumeroVague();
-                        this.gameLoop.pause();
-                        this.ecranVue.afficherAnnonceVague(
-                                derniereVagueAffichee,
-                                () -> {
-                                    if (this.gameLoop != null) this.gameLoop.play();
-                                }
-                        );
-                    }
-                }
+                Duration.seconds(0.017), // Environ 60 FPS
+                ev -> this.env.unTourDeJeu() // Mise à jour logique du modèle, il prévient lui-même des changements
         );
         this.gameLoop.getKeyFrames().add(kf);
     }
 
-    // Le Controller délègue la création de l'image à EntiteVue et ne garde que la réaction au clic !
-    public void faireApparaitreObjet(Objet objet) {
-        ImageView vueObjet = this.entiteVue.creerImageObjet(objet.getX(), objet.getY());
-        if (vueObjet != null) {
-            vueObjet.setOnMouseClicked(event -> {
-                objet.ramasser(); // Action logique sur le modèle
-                this.entiteVue.supprimerNode(vueObjet); // Demande à la vue de retirer l'image
-            });
-        }
-    }
 
     @FXML
     public void lancerJeu(ActionEvent event) {
-        if (this.gameLoop != null && this.gameLoop.getStatus() != Timeline.Status.RUNNING) {
+        if (this.gameLoop == null || this.env.isPartieTerminee()) return; // pas de boucle, ou partie finie
+        if (this.gameLoop.getStatus() != Timeline.Status.RUNNING) {
+            // La boucle doit tourner AVANT de préparer la vague 1 : l'annonce de vague la met en pause
+            this.gameLoop.play();
             if (this.env.getNumeroVague() == 0) {
                 this.env.preparerNouvelleVague();
             }
-            this.gameLoop.play();
         }
     }
 
@@ -277,8 +241,8 @@ public class Controller implements Initializable {
             this.terrainVue.creerTerrain();
         }
 
-        this.tourAcheteeEnCours = null;
-        this.derniereVagueAffichee = 0;
+        this.action = ActionJoueur.AUCUNE;
+        this.tourChoisie = null;
 
         if (this.gameOverLabel != null) this.gameOverLabel.setVisible(false);
         if (this.winLabel != null) this.winLabel.setVisible(false);
@@ -337,52 +301,64 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    public void clicBoutonMitrailletteFrite(ActionEvent event) {
-        this.tourAcheteeEnCours = "MitrailletteFrite";
-    }
+    public void clicBoutonMitrailletteFrite(ActionEvent event) { choisirTour(TypeTour.MITRAILLETTE_FRITE); }
 
     @FXML
-    public void clicBoutonLanceBurger(ActionEvent event) {
-        this.tourAcheteeEnCours = "LanceBurger";
-    }
+    public void clicBoutonLanceBurger(ActionEvent event) { choisirTour(TypeTour.LANCE_BURGER); }
 
     @FXML
-    public void clicBoutonBacGlace(ActionEvent event) {
-        this.tourAcheteeEnCours = "BacGlace";
-    }
+    public void clicBoutonBacGlace(ActionEvent event) { choisirTour(TypeTour.BAC_GLACE); }
 
     @FXML
-    public void clicBoutonBarbecue(ActionEvent event) {
-        this.tourAcheteeEnCours = "Barbecue";
-    }
+    public void clicBoutonBarbecue(ActionEvent event) { choisirTour(TypeTour.BARBECUE); }
 
     @FXML
     public void vendreT(ActionEvent event) {
-        this.tourAcheteeEnCours = "VENDRE";
+        this.action = ActionJoueur.VENDRE;
+        this.tourChoisie = null;
         System.out.println("Mode vente activé : cliquez sur une tour pour la revendre.");
     }
 
     @FXML
     public void ameliorerT(ActionEvent event) {
-        this.tourAcheteeEnCours = "AMELIORER";
+        this.action = ActionJoueur.AMELIORER;
+        this.tourChoisie = null;
         System.out.println("Mode amélioration activé : cliquez sur une tour pour augmenter ses stats.");
     }
 
+    private void choisirTour(TypeTour type) {
+        this.action = ActionJoueur.POSER;
+        this.tourChoisie = type;
+    }
+
+    // Gestion de l'action sur le terrain (Clic de souris)
     @FXML
     public void clicSurTerrain(MouseEvent event) {
-        if (this.tourAcheteeEnCours == null) return;
+        if (this.action == ActionJoueur.AUCUNE) return;
 
         int xAjuste = ((int) event.getX() / 36) * 36;
         int yAjuste = ((int) event.getY() / 36) * 36;
 
-        if (this.tourAcheteeEnCours.equals("VENDRE")) {
-            this.env.vendreTour(xAjuste, yAjuste);
-        } else if (this.tourAcheteeEnCours.equals("AMELIORER")) {
-            this.env.ameliorerTour(xAjuste, yAjuste);
-        } else {
-            this.env.ajouterTour(xAjuste, yAjuste, this.tourAcheteeEnCours);
+        switch (this.action) {
+            case VENDRE -> this.env.vendreTour(xAjuste, yAjuste);
+            case AMELIORER -> this.env.ameliorerTour(xAjuste, yAjuste);
+            case POSER -> this.env.ajouterTour(xAjuste, yAjuste, this.tourChoisie);
+            default -> { }
         }
 
-        this.tourAcheteeEnCours = null;
+        this.action = ActionJoueur.AUCUNE;
+        this.tourChoisie = null;
+    }
+
+    // Affichage de la défaite (appelé quand le modèle passe defaite à vrai)
+    private void afficherDefaite() {
+        this.gameLoop.stop();
+        this.ecranVue.afficherGameOver();
+    }
+
+    // Affichage de la victoire (appelé quand le modèle passe victoire à vrai)
+    private void afficherVictoire() {
+        this.gameLoop.stop();
+        this.ecranVue.afficherVictoire();
     }
 }

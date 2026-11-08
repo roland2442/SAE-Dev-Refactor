@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import universite_paris8.iut.fabdelrahim.sae.modele.Apparition.*;
 import universite_paris8.iut.fabdelrahim.sae.modele.Chemin.Bfs;
 import universite_paris8.iut.fabdelrahim.sae.modele.Chemin.Point;
 import universite_paris8.iut.fabdelrahim.sae.modele.Chemin.Terrain;
@@ -31,30 +32,37 @@ public class Environnement {
     private final ObservableList<Tour> tours;
     private final ObservableList<Enemie> zombies;
     private final ObservableList<Projectile> projectiles;
+    private final ObservableList<Objet> objets; // objets bonus posés au sol
 
     private final IntegerProperty argent;
     private final IntegerProperty numeroVague;
     private final BooleanProperty vagueEnCours;
+    private final BooleanProperty defaite;
+    private final BooleanProperty victoire;
 
     private final IntegerProperty tempsbonus;
 
     private int temps;
     private int zombiesRestantsASpawner;
+    private StrategieApparition strategieApparition = new ApparitionNormale();
     private int delaiAvantProchainZombie;
     private int tempsAvantProchaineVague;
     private int compteurToursSurChemin = 0;
 
-    private Objet objdrop = null;
+    private Objet bonusActif = null; // objet ramassé dont l'effet est en cours
 
     public Environnement() {
         this.terrain = new Terrain();
         this.tours = FXCollections.observableArrayList();
         this.zombies = FXCollections.observableArrayList();
         this.projectiles = FXCollections.observableArrayList();
+        this.objets = FXCollections.observableArrayList();
 
         this.argent = new SimpleIntegerProperty(ArgentDepart);
         this.numeroVague = new SimpleIntegerProperty(0);
         this.vagueEnCours = new SimpleBooleanProperty(false);
+        this.defaite = new SimpleBooleanProperty(false);
+        this.victoire = new SimpleBooleanProperty(false);
         this.tempsbonus = new SimpleIntegerProperty(0);
         this.temps = 0;
 
@@ -75,6 +83,7 @@ public class Environnement {
 
     public void preparerNouvelleVague() {
         numeroVague.set(getNumeroVague() + 1);
+        strategieApparition = choisirStrategie(getNumeroVague());
         vagueEnCours.set(true);
         if (getNumeroVague() < NombreVaguesMax) {
             zombiesRestantsASpawner = 10 * getNumeroVague();
@@ -84,7 +93,7 @@ public class Environnement {
         }
     }
 
-    public void ajouterTour(int pixelX, int pixelY, String type) {
+    public void ajouterTour(int pixelX, int pixelY, TypeTour type) {
         int ligne = pixelY / TailleCase;
         int colonne = pixelX / TailleCase;
         int idTuile = terrain.grille[ligne][colonne];
@@ -95,9 +104,8 @@ public class Environnement {
             }
         }
 
-        boolean estTourSpeciale = type.equals("BacGlace") || type.equals("Barbecue");
 
-        if (estTourSpeciale) {
+        if (type.estPoseSurChemin()) {
             // Les tours de type zone/ralentissement se placent sur le chemin (id 1 ou 100), max 6 au total
             if (idTuile == 1 || idTuile == 100) {
                 if (compteurToursSurChemin >= 6) return;
@@ -108,36 +116,26 @@ public class Environnement {
             if (idTuile != 0) return;
         }
 
-        int cout = coutTour(type);
+        int cout = type.getPrix();
         if (!payerAchat(cout)) return;
 
         Tour nouvelleTour = creerTour(pixelX, pixelY, type);
-        if (nouvelleTour != null) {
-            tours.add(nouvelleTour);
-            if (idTuile == 1 || idTuile == 100) {
-                compteurToursSurChemin++;
-            }
+        tours.add(nouvelleTour);
+        if (idTuile == 1 || idTuile == 100) {
+            compteurToursSurChemin++;
         }
+
     }
 
-    private int coutTour(String type) {
-        switch (type) {
-            case "LanceBurger": return 200;
-            case "MitrailletteFrite": return 100;
-            case "BacGlace": return 150;
-            case "Barbecue": return 250;
-            default: return 100;
-        }
-    }
 
-    private Tour creerTour(int x, int y, String type) {
-        switch (type) {
-            case "LanceBurger": return new LanceBurger(x, y);
-            case "MitrailletteFrite": return new MitrailletteFrite(x, y);
-            case "BacGlace": return new BacGlace(x, y);
-            case "Barbecue": return new Barbecue(x, y);
-            default: return new MitrailletteFrite(x, y);
-        }
+
+    private Tour creerTour(int x, int y, TypeTour type) {
+        return switch (type) {
+            case LANCE_BURGER -> new LanceBurger(x, y);
+            case MITRAILLETTE_FRITE -> new MitrailletteFrite(x, y);
+            case BAC_GLACE -> new BacGlace(x, y);
+            case BARBECUE -> new Barbecue(x, y);
+        };
     }
 
     public void unTourDeJeu() {
@@ -150,10 +148,35 @@ public class Environnement {
         mettreAJourProjectiles();
         mettreAJourZombies();
         gererTransitionVague();
+        gererBonusActif();
+        verifierFinDePartie();
+    }
 
-        if (objdrop != null) {
-            objdrop.agir();
+    // L'effet du bonus ramassé diminue à chaque tour, puis un nouveau bonus pourra tomber
+    private void gererBonusActif() {
+        if (bonusActif == null) return;
+
+        bonusActif.agir();
+        if (getTempsbonus() == 0) {
+            bonusActif = null;
         }
+    }
+
+    // Le modèle décide lui-même si la partie est finie, le contrôleur est prévenu par les propriétés
+    private void verifierFinDePartie() {
+        if (isPartieTerminee()) return;
+
+        if (base != null && base.estDetruit()) {
+            defaite.set(true);
+        } else if (toutesVaguesTerminees()) {
+            victoire.set(true);
+        }
+    }
+
+    // Appelé par Objet quand le joueur le ramasse : il quitte le sol mais son effet continue
+    public void objetRamasse(Objet objet) {
+        objets.remove(objet);
+        bonusActif = objet;
     }
 
     private void gererAparition() {
@@ -210,8 +233,9 @@ public class Environnement {
                 }
             }
 
-            if (z.estMort() && this.objdrop == null && Objet.lacher()) {
-                this.objdrop = new Objet(z.getX(), z.getY(), this);
+            // Un seul bonus à la fois : rien au sol et aucun effet en cours
+            if (z.estMort() && this.objets.isEmpty() && this.bonusActif == null && Objet.lacher()) {
+                this.objets.add(new Objet(z.getX(), z.getY(), this));
             }
 
             if (z.estMort() || z.estArrive()) {
@@ -247,40 +271,17 @@ public class Environnement {
         int pixelX = (int) (depart.y * TailleCase);
         int pixelY = (int) (depart.x * TailleCase);
 
-        Enemie zombie = creerZombieSelonVague(pixelX, pixelY);
+        Enemie zombie = strategieApparition.creerZombie(pixelX, pixelY, zombiesRestantsASpawner, Math.random());
         zombie.setChemin(chemin);
         zombies.add(zombie);
     }
 
-    // Algorithme de sélection probabiliste et cyclique des types d'ennemis selon la difficulté
-    private Enemie creerZombieSelonVague(int x, int y) {
-        int vague = getNumeroVague();
-        double hasard = Math.random();
-
-        if (vague == NombreVaguesMax) {
-            if (zombiesRestantsASpawner == 25) return new Boss(x, y);
-            if (hasard < 0.20) return new ZombieGros(x, y);
-            if (hasard < 0.40) return new ZombieFamille(x, y);
-            if (hasard < 0.50) return new ZombieRapide(x, y);
-            if (hasard < 0.55) return new ZombieNormal(x, y);
-        }
-
-        if (vague >= 5) {
-            if (hasard < 0.20) return new ZombieGros(x, y);
-            if (hasard < 0.40) return new ZombieFamille(x, y);
-            if (hasard < 0.70) return new ZombieRapide(x, y);
-            return new ZombieNormal(x, y);
-        }
-        if (vague >= 3) {
-            if (zombiesRestantsASpawner % 4 == 0) return new ZombieGros(x, y);
-            if (zombiesRestantsASpawner % 3 == 0) return new ZombieRapide(x, y);
-            return new ZombieNormal(x, y);
-        }
-        if (vague >= 2) {
-            if (zombiesRestantsASpawner % 3 == 0) return new ZombieRapide(x, y);
-            return new ZombieNormal(x, y);
-        }
-        return new ZombieNormal(x, y);
+    private StrategieApparition choisirStrategie(int vague) {
+        if (vague == NombreVaguesMax) return new ApparitionFinale();
+        if (vague >= 5) return new ApparitionAleatoire();
+        if (vague >= 3) return new ApparitionGros();
+        if (vague >= 2) return new ApparitionRapide();
+        return new ApparitionNormale();
     }
 
     public void vendreTour(int pixelX, int pixelY) {
@@ -293,8 +294,7 @@ public class Environnement {
         }
 
         if (tourATrouver != null) {
-            String type = tourATrouver.getIdentite();
-            int prixDeBase = coutTour(type);
+            int prixDeBase = tourATrouver.getType().getPrix();
             int remboursement = prixDeBase / 2;
 
             argent.set(getArgent() + remboursement);
@@ -339,6 +339,7 @@ public class Environnement {
     public ObservableList<Enemie> getZombies() { return zombies; }
     public ObservableList<Tour> getTours() { return tours; }
     public ObservableList<Projectile> getProjectiles() { return this.projectiles; }
+    public ObservableList<Objet> getObjets() { return this.objets; }
     public Terrain getTerrain() { return terrain; }
     public Comptoir getBase() { return base; }
 
@@ -349,7 +350,9 @@ public class Environnement {
     public IntegerProperty numeroVagueProperty() { return numeroVague; }
     public BooleanProperty vagueEnCoursProperty() { return vagueEnCours; }
 
-    public Objet getObjdrop() { return this.objdrop; }
+    public BooleanProperty defaiteProperty() { return defaite; }
+    public BooleanProperty victoireProperty() { return victoire; }
+    public boolean isPartieTerminee() { return defaite.get() || victoire.get(); }
 
     public IntegerProperty tempsbonusProperty() { return this.tempsbonus; }
     public int getTempsbonus() { return this.tempsbonus.get(); }

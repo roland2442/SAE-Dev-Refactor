@@ -1,6 +1,8 @@
 package universite_paris8.iut.fabdelrahim.sae.vue;
 
 import javafx.scene.image.Image;
+import universite_paris8.iut.fabdelrahim.sae.modele.Tours.TypeTour;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,5 +31,9 @@ public class GestionImage {
 
     public static Image getImage(String key) {
         return sprites.get(key);
+    }
+
+    public static Image getImage(TypeTour type) {
+        return sprites.get(type.getCleImage());
     }
 }
