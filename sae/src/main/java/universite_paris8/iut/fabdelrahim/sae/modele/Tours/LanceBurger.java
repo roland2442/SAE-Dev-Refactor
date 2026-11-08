@@ -2,7 +2,7 @@ package universite_paris8.iut.fabdelrahim.sae.modele.Tours;
 
 import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
 import universite_paris8.iut.fabdelrahim.sae.modele.Projectiles.Burger;
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 
 public class LanceBurger extends Tour {
 
@@ -11,7 +11,7 @@ public class LanceBurger extends Tour {
     }
 
     @Override
-    protected void gererActionTour(Enemie cible, Environnement env) {
+    protected void gererActionTour(Enemi cible, Environnement env) {
         Burger b = new Burger(this.getX() + 10, this.getY() + 10, cible);
         b.setDegats(this.degats);
         env.getProjectiles().add(b);

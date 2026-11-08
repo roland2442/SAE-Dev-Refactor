@@ -1,7 +1,7 @@
 package universite_paris8.iut.fabdelrahim.sae.modele.Tours;
 
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
-import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
+
 import java.util.List;
 
 public class BacGlace extends Tour {
@@ -11,11 +11,11 @@ public class BacGlace extends Tour {
     }
 
     @Override
-    protected void appliquerEffetImmediat(Enemie cible, List<Enemie> listeZombies) {
+    protected void appliquerEffetImmediat(Enemi cible, List<Enemi> listeZombies) {
         System.out.println("Le Bac à Glace s'active et gèle la zone !");
 
         // on parcourt tous les zombies pour ralentir ceux à portée
-        for (Enemie z : listeZombies) {
+        for (Enemi z : listeZombies) {
             if (!z.estMort()) {
                 //Utilisation de getX() et getY() pour extraire la valeur de la Property
                 double dx = (z.getX() + 18) - (this.getX() + 18);

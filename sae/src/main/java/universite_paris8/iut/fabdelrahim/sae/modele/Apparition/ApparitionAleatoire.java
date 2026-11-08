@@ -1,6 +1,6 @@
 package universite_paris8.iut.fabdelrahim.sae.modele.Apparition;
 
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.ZombieFamille;
 import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.ZombieGros;
 import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.ZombieNormal;
@@ -10,7 +10,7 @@ import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.ZombieRapide;
 public class ApparitionAleatoire implements StrategieApparition {
 
     @Override
-    public Enemie creerZombie(int x, int y, int zombiesRestants, double hasard) {
+    public Enemi creerZombie(int x, int y, int zombiesRestants, double hasard) {
         if (hasard < 0.20) return new ZombieGros(x, y);
         if (hasard < 0.40) return new ZombieFamille(x, y);
         if (hasard < 0.70) return new ZombieRapide(x, y);

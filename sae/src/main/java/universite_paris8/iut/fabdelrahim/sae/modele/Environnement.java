@@ -30,7 +30,7 @@ public class Environnement {
     private final List<Point> chemin;
     private final Comptoir base;
     private final ObservableList<Tour> tours;
-    private final ObservableList<Enemie> zombies;
+    private final ObservableList<Enemi> zombies;
     private final ObservableList<Projectile> projectiles;
     private final ObservableList<Objet> objets; // objets bonus posés au sol
 
@@ -68,7 +68,8 @@ public class Environnement {
 
         Point debut = terrain.trouverEntree();
         Point arrivee = terrain.trouverSortie();
-        this.chemin = Bfs.bfs(terrain.grille, debut, arrivee);
+        //getter en place
+        this.chemin = Bfs.bfs(terrain.getGrille(), debut, arrivee);
 
         if (chemin.isEmpty()) {
             System.err.println("Aucun chemin valide trouvé !");
@@ -96,7 +97,8 @@ public class Environnement {
     public void ajouterTour(int pixelX, int pixelY, TypeTour type) {
         int ligne = pixelY / TailleCase;
         int colonne = pixelX / TailleCase;
-        int idTuile = terrain.grille[ligne][colonne];
+        //getter mis en place
+        int idTuile = terrain.getGrille()[ligne][colonne];
 
         for (Tour t : tours) {
             if (t.getX() == pixelX && t.getY() == pixelY) {
@@ -214,7 +216,7 @@ public class Environnement {
     private void mettreAJourZombies() {
         // Boucle à rebours pour nettoyer la liste et injecter des enfants à la volée sans casser l'index
         for (int i = zombies.size() - 1; i >= 0; i--) {
-            Enemie z = zombies.get(i);
+            Enemi z = zombies.get(i);
             z.avancer();
 
             if (z.estArrive() && base != null) {
@@ -228,7 +230,7 @@ public class Environnement {
             if (z instanceof ZombieFamille zf) {
                 if (zf.estMort()) {
                     // Les sous-unités apparaissent sur la case exacte du parent pour suivre la suite du chemin
-                    List<Enemie> enfants = zf.genererEnfants(chemin, zf.getEtapeActuelle());
+                    List<Enemi> enfants = zf.genererEnfants(chemin, zf.getEtapeActuelle());
                     zombies.addAll(enfants);
                 }
             }
@@ -271,7 +273,7 @@ public class Environnement {
         int pixelX = (int) (depart.y * TailleCase);
         int pixelY = (int) (depart.x * TailleCase);
 
-        Enemie zombie = strategieApparition.creerZombie(pixelX, pixelY, zombiesRestantsASpawner, Math.random());
+        Enemi zombie = strategieApparition.creerZombie(pixelX, pixelY, zombiesRestantsASpawner, Math.random());
         zombie.setChemin(chemin);
         zombies.add(zombie);
     }
@@ -301,7 +303,8 @@ public class Environnement {
 
             int ligne = pixelY / TailleCase;
             int colonne = pixelX / TailleCase;
-            int idTuile = terrain.grille[ligne][colonne];
+            //getter mis en place
+            int idTuile = terrain.getGrille()[ligne][colonne];
             if (idTuile == 1 || idTuile == 100) {
                 compteurToursSurChemin--;
             }
@@ -336,7 +339,7 @@ public class Environnement {
         return getNumeroVague() >= NombreVaguesMax && !vagueEnCours.get() && zombies.isEmpty();
     }
 
-    public ObservableList<Enemie> getZombies() { return zombies; }
+    public ObservableList<Enemi> getZombies() { return zombies; }
     public ObservableList<Tour> getTours() { return tours; }
     public ObservableList<Projectile> getProjectiles() { return this.projectiles; }
     public ObservableList<Objet> getObjets() { return this.objets; }

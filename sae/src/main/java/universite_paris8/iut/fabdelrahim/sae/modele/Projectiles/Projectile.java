@@ -1,7 +1,7 @@
 package universite_paris8.iut.fabdelrahim.sae.modele.Projectiles;
 
 import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
@@ -10,14 +10,14 @@ public abstract class Projectile {
     protected DoubleProperty y;
     protected double vitesse;
     protected int degats;
-    protected Enemie cible; //Le projectile doit retenir qui il chasse
+    protected Enemi cible; //Le projectile doit retenir qui il chasse
     protected String identite;
     protected boolean aTouche; // Pour savoir quand le supprimer
     private static int compteurProj = 0;
     private String idUnique;
 
 
-    public Projectile(double x, double y, double vitesse, int degats, Enemie cible, String identite) {
+    public Projectile(double x, double y, double vitesse, int degats, Enemi cible, String identite) {
         this.x = new SimpleDoubleProperty(x);
         this.y = new SimpleDoubleProperty(y);
         this.vitesse = vitesse;
@@ -80,7 +80,7 @@ public abstract class Projectile {
         return degats;
     }
     public void setDegats(int nouveauxDegats) {this.degats = nouveauxDegats;}
-    public Enemie getCible() {
+    public Enemi getCible() {
         return cible;
     }
     public String getIdentite() {

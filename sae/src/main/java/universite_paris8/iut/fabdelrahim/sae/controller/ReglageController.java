@@ -4,12 +4,20 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import javafx.stage.Stage;
+import universite_paris8.iut.fabdelrahim.sae.vue.GestionSon;
+
 import java.io.IOException;
 
-public class reglageController {
+public class ReglageController {
 
     @FXML
     private Slider volume;
+    private JeuController jeuPrincipal;
+
+    // Récuperation du contrôleur
+    public void setJeuController(JeuController jeu) {
+        this.jeuPrincipal = jeu;
+    }
 
     @FXML
     public void initialize() {
@@ -27,8 +35,9 @@ public class reglageController {
     public void quitte(ActionEvent event) throws IOException {
         GestionSon.getInstance().reprendre();
 
-        if (GestionJeu.getInstance().getController() != null) {
-            GestionJeu.getInstance().getController().lancerJeu(null);
+        //utilisation de la référence direct
+        if (this.jeuPrincipal != null) {
+            this.jeuPrincipal.lancerJeu(null);
         }
 
         Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
@@ -38,7 +47,10 @@ public class reglageController {
     @FXML
     public void recommencerJeu(ActionEvent event) {
         GestionSon.getInstance().reprendre();
-        GestionJeu.getInstance().getController().recommencerJeu(null);
+        //même chose ici
+        if (this.jeuPrincipal != null) {
+            this.jeuPrincipal.recommencerJeu(null);
+        }
         Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
         stage.close();
     }

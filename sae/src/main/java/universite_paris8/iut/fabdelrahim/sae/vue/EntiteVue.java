@@ -12,7 +12,7 @@ import javafx.scene.layout.VBox;
 import universite_paris8.iut.fabdelrahim.sae.modele.Objet;
 import universite_paris8.iut.fabdelrahim.sae.modele.Projectiles.Projectile;
 import universite_paris8.iut.fabdelrahim.sae.modele.Tours.Tour;
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 import universite_paris8.iut.fabdelrahim.sae.modele.Tours.TypeTour;
 import java.io.IOException;
 import java.net.URL;
@@ -29,7 +29,7 @@ public class EntiteVue {
 
     // ---------- Ajout / retrait des entités dans le panneau de jeu ----------
 
-    public void ajouterZombie(Enemie zombie) {
+    public void ajouterZombie(Enemi zombie) {
         ImageView image = creerImageZombie(zombie.getIdentite(), zombie.getIdUnique());
         if (image != null) {
             image.layoutXProperty().bind(zombie.xProperty());

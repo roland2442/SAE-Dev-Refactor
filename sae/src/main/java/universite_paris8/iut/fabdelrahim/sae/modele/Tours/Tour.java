@@ -1,7 +1,7 @@
 package universite_paris8.iut.fabdelrahim.sae.modele.Tours;
 
 
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
 
 import javafx.beans.property.IntegerProperty;
@@ -55,11 +55,11 @@ public class Tour {
             return;
         }
 
-        List<Enemie> listeZombies = env.getZombies();
+        List<Enemi> listeZombies = env.getZombies();
 
         // Recherche du premier zombie à portée de tir
         for (int i = 0; i < listeZombies.size(); i++) {
-            Enemie zombie = listeZombies.get(i);
+            Enemi zombie = listeZombies.get(i);
 
             if (!zombie.estMort()) {
                 // Calcul de la distance entre le centre de la tour (36x36) et le centre du zombie (36x36)
@@ -87,13 +87,13 @@ public class Tour {
         }
     }
 
-    protected void gererActionTour(Enemie cible, Environnement env) {
+    protected void gererActionTour(Enemi cible, Environnement env) {
         // Par défaut : effet direct (pièges au sol). Les tours à projectiles redéfinissent cette méthode.
         this.appliquerEffetImmediat(cible, env.getZombies());
     }
 
     // Comportement vide par défaut pour les tours à projectiles classiques
-    protected void appliquerEffetImmediat(Enemie cible, List<Enemie> listeZombies) {
+    protected void appliquerEffetImmediat(Enemi cible, List<Enemi> listeZombies) {
     }
 
     //Getters et Setters

@@ -3,7 +3,7 @@ package universite_paris8.iut.fabdelrahim.sae.modele.Tours;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.ZombieNormal;
 import universite_paris8.iut.fabdelrahim.sae.modele.Projectiles.Burger;
 
@@ -52,7 +52,7 @@ class TourTest {
 
     @Test
     void testAttaquerCibleAPortee() {
-        Enemie zombie = new ZombieNormal(20, 20);
+        Enemi zombie = new ZombieNormal(20, 20);
         env.getZombies().add(zombie);
 
         assertEquals(0, tourBurger.cooldown);
@@ -65,7 +65,7 @@ class TourTest {
 
     @Test
     void testAttaquerCibleHorsPortee() {
-        Enemie zombie = new ZombieNormal(100, 100);
+        Enemi zombie = new ZombieNormal(100, 100);
         env.getZombies().add(zombie);
 
         tourBurger.attaquer(env);
@@ -76,7 +76,7 @@ class TourTest {
 
     @Test
     void testAttaquerSousCooldown() {
-        Enemie zombie = new ZombieNormal(20, 20);
+        Enemi zombie = new ZombieNormal(20, 20);
         env.getZombies().add(zombie);
 
         tourBurger.attaquer(env);
@@ -90,7 +90,7 @@ class TourTest {
 
     @Test
     void testAttaquerZombieMort() {
-        Enemie zombieMort = new ZombieMort(20, 20);
+        Enemi zombieMort = new ZombieMort(20, 20);
         env.getZombies().add(zombieMort);
 
         tourBurger.attaquer(env);

@@ -1,4 +1,4 @@
-package universite_paris8.iut.fabdelrahim.sae.controller;
+package universite_paris8.iut.fabdelrahim.sae.vue;
 
 import javax.sound.sampled.*;
 

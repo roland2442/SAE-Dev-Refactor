@@ -5,7 +5,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import java.util.List;
 
-public class Enemie {
+public class Enemi {
 
     private static final int TailleCase = 36;
     private static int compteur = 0;
@@ -28,7 +28,7 @@ public class Enemie {
     private int brulure = 0;
     private boolean ralenti = false;
 
-    public Enemie(int x, int y, double vitesse, int hp, int degat, String identite) {
+    public Enemi(int x, int y, double vitesse, int hp, int degat, String identite) {
         this.x = new SimpleDoubleProperty(x);
         this.y = new SimpleDoubleProperty(y);
         this.vitesse = vitesse;

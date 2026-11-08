@@ -1,212 +1,93 @@
 package universite_paris8.iut.fabdelrahim.sae.vue;
 
-import javafx.fxml.FXML;
+//plus besoin du import fxml
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.TilePane;
 import universite_paris8.iut.fabdelrahim.sae.modele.Chemin.Terrain;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class TerrainVue {
 
-    private Terrain terrain;
-    private TilePane map;
+    private final Terrain terrain;
+    private final TilePane map;
+    private final Map<Integer, Image> dictionnaireImages;
 
-    public TerrainVue(Terrain t,TilePane map){
+    public TerrainVue(Terrain t, TilePane map) {
         this.terrain = t;
         this.map = map;
+        this.dictionnaireImages = new HashMap<>();
+        this.initDictionnaire();
     }
 
+    //methode pour se faciliter la tache et ne pas repeter le chemin
+    private Image chargerImage(String nomFichier) {
+        return new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/" + nomFichier));
+    }
 
+    // On charge toutes nos image dans une Map
+    private void initDictionnaire() {
+        dictionnaireImages.put(0, chargerImage("table.png"));
+        dictionnaireImages.put(1, chargerImage("tapisrose.png"));
+        dictionnaireImages.put(2, chargerImage("tapisrose.png"));
+        dictionnaireImages.put(3, chargerImage("entrer2.png"));
+        dictionnaireImages.put(4, chargerImage("table.png"));
+        dictionnaireImages.put(5, chargerImage("barrage5.png"));
+        dictionnaireImages.put(6, chargerImage("barrage6.png"));
+        dictionnaireImages.put(8, chargerImage("panneau8.png"));
+        dictionnaireImages.put(9, chargerImage("solcasser.png"));
 
+        dictionnaireImages.put(10, chargerImage("c1.png"));
+        dictionnaireImages.put(11, chargerImage("c2.png"));
+        dictionnaireImages.put(12, chargerImage("c3.png"));
+        dictionnaireImages.put(13, chargerImage("c4.png"));
+        dictionnaireImages.put(14, chargerImage("c5.png"));
+        dictionnaireImages.put(15, chargerImage("c6.png"));
+        dictionnaireImages.put(16, chargerImage("c7.png"));
+        dictionnaireImages.put(17, chargerImage("c8.png"));
+        dictionnaireImages.put(18, chargerImage("c9.png"));
+        dictionnaireImages.put(19, chargerImage("c10.png"));
+        dictionnaireImages.put(20, chargerImage("c11.png"));
+        dictionnaireImages.put(21, chargerImage("c12.png"));
+        dictionnaireImages.put(22, chargerImage("c13.png"));
+        dictionnaireImages.put(23, chargerImage("c14.png"));
+        dictionnaireImages.put(24, chargerImage("c15.png"));
+        dictionnaireImages.put(25, chargerImage("c16.png"));
+        dictionnaireImages.put(26, chargerImage("c17.png"));
+        dictionnaireImages.put(27, chargerImage("c18.png"));
 
-    @FXML
+        dictionnaireImages.put(28, chargerImage("panneau9.png"));
+        dictionnaireImages.put(31, chargerImage("chaise1.png"));
+        dictionnaireImages.put(32, chargerImage("chaise2.png"));
+        dictionnaireImages.put(33, chargerImage("chaise3.png"));
+        dictionnaireImages.put(34, chargerImage("chaise4.png"));
+        dictionnaireImages.put(50, chargerImage("c50.png"));
+        dictionnaireImages.put(100, chargerImage("c50.png"));
+    }
+
     public void creerTerrain() {
-        int[][] grille = terrain.grille;
+        // On récupère la grille via le nouveau getter
+        int[][] grille = terrain.getGrille();
 
         int tailleTuile = 36;
         map.setPrefColumns(32);
         map.setPrefRows(21);
-
         map.setPrefTileWidth(tailleTuile);
         map.setPrefTileHeight(tailleTuile);
-
-
-        Image sol = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/tapisrose.png"));
-        Image entrer = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/entrer2.png"));
-        Image sortie = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/table.png"));
-        Image barrage5 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/barrage5.png"));
-        Image barrage6 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/barrage6.png"));
-        Image panneau8 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/panneau8.png"));
-        Image solcasser = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/solcasser.png"));
-        Image c1 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c1.png"));
-        Image c2 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c2.png"));
-        Image c3 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c3.png"));
-        Image c4 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c4.png"));
-        Image c5 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c5.png"));
-        Image c6 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c6.png"));
-        Image c7 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c7.png"));
-        Image c8 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c8.png"));
-        Image c9 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c9.png"));
-        Image c10 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c10.png"));
-        Image c11 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c11.png"));
-        Image c12 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c12.png"));
-        Image c13 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c13.png"));
-        Image c14 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c14.png"));
-        Image c15 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c15.png"));
-        Image c16 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c16.png"));
-        Image c17 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c17.png"));
-        Image c18 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c18.png"));
-        Image c50 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/c50.png"));
-        Image panneau9 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/panneau9.png"));
-        Image chaise1 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/chaise1.png"));
-        Image chaise2 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/chaise2.png"));
-        Image chaise3 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/chaise3.png"));
-        Image chaise4 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/chaise4.png"));
-        Image table = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/table.png"));
 
         for (int i = 0; i < grille.length; i++) {
             for (int j = 0; j < grille[i].length; j++) {
                 ImageView cases = new ImageView();
                 cases.setFitHeight(tailleTuile);
                 cases.setFitWidth(tailleTuile);
-                int t = grille[i][j];
-                switch (t) {
-                    case 0:
-                        cases.setImage(table);
-                        break;
-                    case 1:
-                        cases.setImage(sol);
-                        break;
-                    case 2:
-                        cases.setImage(sol);
-                        break;
+                int numTuile = grille[i][j];
+                //demande au dictionnaire l'image associée au numéro.
+                Image img = dictionnaireImages.get(numTuile);
+                cases.setImage(img);
 
-                    case 3:
-                        cases.setImage(entrer);
-                        break;
-
-                    case 4:
-                        cases.setImage(sortie);
-                        break;
-
-                    case 5:
-                        cases.setImage(barrage5);
-                        break;
-
-                    case 6:
-                        cases.setImage(barrage6);
-                        break;
-
-
-
-                    case 8:
-                        cases.setImage(panneau8);
-                        break;
-
-                    case 9:
-                        cases.setImage(solcasser);
-                        break;
-
-                    case 10:
-                        cases.setImage(c1);
-                        break;
-
-                    case 11:
-                        cases.setImage(c2);
-                        break;
-
-                    case 12:
-                        cases.setImage(c3);
-                        break;
-
-                    case 13:
-                        cases.setImage(c4);
-                        break;
-
-                    case 14:
-                        cases.setImage(c5);
-                        break;
-
-                    case 15:
-                        cases.setImage(c6);
-                        break;
-                    case 16:
-                        cases.setImage(c7);
-                        break;
-
-                    case 17:
-                        cases.setImage(c8);
-                        break;
-
-                    case 18:
-                        cases.setImage(c9);
-                        break;
-                    case 19:
-                        cases.setImage(c10);
-                        break;
-                    case 20:
-                        cases.setImage(c11);
-                        break;
-                    case 21:
-                        cases.setImage(c12);
-                        break;
-                    case 22:
-                        cases.setImage(c13);
-                        break;
-
-                    case 23:
-                        cases.setImage(c14);
-                        break;
-
-                    case 24:
-                        cases.setImage(c15);
-                        break;
-
-                    case 25:
-                        cases.setImage(c16);
-                        break;
-
-                    case 26:
-                        cases.setImage(c17);
-                        break;
-
-                    case 27:
-                        cases.setImage(c18);
-                        break;
-
-                    case 28:
-                        cases.setImage(panneau9);
-                        break;
-
-                    case 50:
-                        cases.setImage(c50);
-                        break;
-
-                    case 100:
-                        cases.setImage(c50);
-                        break;
-
-                    case 31:
-                        cases.setImage(chaise1);
-                        break;
-
-                    case 32:
-                        cases.setImage(chaise2);
-                        break;
-
-                    case 33:
-                        cases.setImage(chaise3);
-                        break;
-
-                    case 34:
-                        cases.setImage(chaise4);
-                        break;
-
-                    default:
-                        cases.setImage(c50);
-                        break;
-                }
                 map.getChildren().add(cases);
             }
         }
