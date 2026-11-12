@@ -5,6 +5,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.TilePane;
 import universite_paris8.iut.fabdelrahim.sae.modele.Chemin.Terrain;
+import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
 
 
 public class TerrainVue {
@@ -22,11 +23,9 @@ public class TerrainVue {
 
     @FXML
     public void creerTerrain() {
-        int[][] grille = terrain.grille;
-
-        int tailleTuile = 36;
-        map.setPrefColumns(32);
-        map.setPrefRows(21);
+        int tailleTuile = Environnement.TailleCase;
+        map.setPrefColumns(terrain.getNbColonnes());
+        map.setPrefRows(terrain.getNbLignes());
 
         map.setPrefTileWidth(tailleTuile);
         map.setPrefTileHeight(tailleTuile);
@@ -65,12 +64,12 @@ public class TerrainVue {
         Image chaise4 = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/chaise4.png"));
         Image table = new Image(getClass().getResourceAsStream("/universite_paris8/iut/fabdelrahim/sae/vue/table.png"));
 
-        for (int i = 0; i < grille.length; i++) {
-            for (int j = 0; j < grille[i].length; j++) {
+        for (int i = 0; i < terrain.getNbLignes(); i++) {
+            for (int j = 0; j < terrain.getNbColonnes(); j++) {
                 ImageView cases = new ImageView();
                 cases.setFitHeight(tailleTuile);
                 cases.setFitWidth(tailleTuile);
-                int t = grille[i][j];
+                int t = terrain.getCase(i, j);
                 switch (t) {
                     case 0:
                         cases.setImage(table);

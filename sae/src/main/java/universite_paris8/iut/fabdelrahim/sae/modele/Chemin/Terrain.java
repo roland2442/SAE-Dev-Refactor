@@ -2,7 +2,7 @@ package universite_paris8.iut.fabdelrahim.sae.modele.Chemin;
 
 public class Terrain {
 
-    public int[][] grille = {
+    private int[][] grille = {
 
             {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 50, 50, 50},
             {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 50, 50, 50},
@@ -26,6 +26,23 @@ public class Terrain {
             {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 50, 50, 50},
             {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 50, 50, 50}
     };
+    public int getCase(int ligne, int colonne) {
+        return grille[ligne][colonne];
+    }
+
+    public int getNbLignes() {
+        return grille.length;
+    }
+
+    public int getNbColonnes() {
+        return grille[0].length;
+    }
+
+    // Utilisé seulement par le calcul du chemin (Bfs), qui a besoin de toute la grille
+    public int[][] getGrille() {
+        return grille;
+    }
+
     public Point trouverEntree() {
         for (int i = 0; i < grille.length; i++) {
             for (int j = 0; j < grille[i].length; j++) {

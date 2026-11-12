@@ -1,5 +1,6 @@
 package universite_paris8.iut.fabdelrahim.sae.modele;
 
+import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -19,7 +20,7 @@ public class Environnement {
 
     private static final int ArgentDepart = 150;
     private static final int RecompenseParZombie = 10;
-    private static final int TailleCase = 36;
+    public static final int TailleCase = 36; // taille d'une case en pixels, aussi utilisée par la vue
 
     private static final int Delaiavantaparition = 10;
     private static final int DelaientreVague = 60;
@@ -68,7 +69,7 @@ public class Environnement {
 
         Point debut = terrain.trouverEntree();
         Point arrivee = terrain.trouverSortie();
-        this.chemin = Bfs.bfs(terrain.grille, debut, arrivee);
+        this.chemin = Bfs.bfs(terrain.getGrille(), debut, arrivee);
 
         if (chemin.isEmpty()) {
             System.err.println("Aucun chemin valide trouvé !");
@@ -93,10 +94,17 @@ public class Environnement {
         }
     }
 
+    // Ramène un pixel au coin de la case qui le contient
+    private int alignerSurCase(int pixel) {
+        return (pixel / TailleCase) * TailleCase;
+    }
+
     public void ajouterTour(int pixelX, int pixelY, TypeTour type) {
+        pixelX = alignerSurCase(pixelX);
+        pixelY = alignerSurCase(pixelY);
         int ligne = pixelY / TailleCase;
         int colonne = pixelX / TailleCase;
-        int idTuile = terrain.grille[ligne][colonne];
+        int idTuile = terrain.getCase(ligne, colonne);
 
         for (Tour t : tours) {
             if (t.getX() == pixelX && t.getY() == pixelY) {
@@ -148,8 +156,19 @@ public class Environnement {
         mettreAJourProjectiles();
         mettreAJourZombies();
         gererTransitionVague();
+        gererObjetsAuSol();
         gererBonusActif();
         verifierFinDePartie();
+    }
+
+    // Un objet qui n'est pas ramassé disparaît au bout d'un moment : un nouveau bonus pourra tomber
+    private void gererObjetsAuSol() {
+        for (Objet objet : new ArrayList<>(objets)) {
+            objet.vieillir();
+            if (objet.estExpire()) {
+                objets.remove(objet);
+            }
+        }
     }
 
     // L'effet du bonus ramassé diminue à chaque tour, puis un nouveau bonus pourra tomber
@@ -285,6 +304,8 @@ public class Environnement {
     }
 
     public void vendreTour(int pixelX, int pixelY) {
+        pixelX = alignerSurCase(pixelX);
+        pixelY = alignerSurCase(pixelY);
         Tour tourATrouver = null;
         for (Tour t : tours) {
             if (t.getX() == pixelX && t.getY() == pixelY) {
@@ -301,7 +322,7 @@ public class Environnement {
 
             int ligne = pixelY / TailleCase;
             int colonne = pixelX / TailleCase;
-            int idTuile = terrain.grille[ligne][colonne];
+            int idTuile = terrain.getCase(ligne, colonne);
             if (idTuile == 1 || idTuile == 100) {
                 compteurToursSurChemin--;
             }
@@ -312,6 +333,8 @@ public class Environnement {
     }
 
     public void ameliorerTour(int pixelX, int pixelY) {
+        pixelX = alignerSurCase(pixelX);
+        pixelY = alignerSurCase(pixelY);
         Tour tourATrouver = null;
         for (Tour t : tours) {
             if (t.getX() == pixelX && t.getY() == pixelY) {

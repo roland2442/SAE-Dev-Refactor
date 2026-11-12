@@ -4,6 +4,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
 public class Comptoir {
+    public static final int HP_MAX = 100;
     private int x;
     private int y;
     private String identite;
@@ -14,8 +15,8 @@ public class Comptoir {
         this.x = x;
         this.y = y;
         this.identite = identite;
-        // Initialisation de la Property à 100 Pv
-        this.hp = new SimpleIntegerProperty(100);
+        // Initialisation de la Property aux PV maximum
+        this.hp = new SimpleIntegerProperty(HP_MAX);
     }
 
     public void recevoirDegats(int degats) {
@@ -32,6 +33,9 @@ public class Comptoir {
         return this.hp;
     }
 
+    public int getHpMax() {
+        return HP_MAX;
+    }
     public int getHp() {
         return this.hp.get();
     }

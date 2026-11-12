@@ -2,12 +2,15 @@ package universite_paris8.iut.fabdelrahim.sae.modele;
 import universite_paris8.iut.fabdelrahim.sae.modele.Tours.Tour;
 
 public class Objet {
+    public static final int DUREE_BONUS = 600; // durée de l'effet une fois ramassé
+    public static final int DUREE_AU_SOL = 200; // temps avant de disparaître s'il n'est pas ramassé
 
     private double x;
     private double y;
     private Environnement env;
     private boolean ramasse;
     private int tempseffet;
+    private int tempsRestantAuSol = DUREE_AU_SOL;
     private static int compteur = 0;
     private final String idUnique;
 
@@ -29,11 +32,20 @@ public class Objet {
     public void ramasser(){
         if (this.ramasse) return; // un objet ne peut être ramassé qu'une fois
         this.ramasse=true;
-        this.env.setTempsbonus(600);
+        this.env.setTempsbonus(DUREE_BONUS);
         for (Tour tour : this.env.getTours()){
             tour.setDegats((int)(tour.getDegats() * 1.2));//+20% dégâts
         }
         this.env.objetRamasse(this); // le modèle retire l'objet du sol et suit son effet
+    }
+
+    // Un objet qui reste au sol finit par disparaître
+    public void vieillir(){
+        if (!this.ramasse) this.tempsRestantAuSol--;
+    }
+
+    public boolean estExpire(){
+        return !this.ramasse && this.tempsRestantAuSol <= 0;
     }
 
     // Le temps diminue

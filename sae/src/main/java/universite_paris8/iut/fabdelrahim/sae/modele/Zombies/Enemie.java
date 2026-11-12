@@ -1,13 +1,13 @@
 package universite_paris8.iut.fabdelrahim.sae.modele.Zombies;
 
 import universite_paris8.iut.fabdelrahim.sae.modele.Chemin.Point;
+import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import java.util.List;
 
 public class Enemie {
 
-    private static final int TailleCase = 36;
     private static int compteur = 0;
 
     private final String idUnique;
@@ -47,8 +47,8 @@ public class Enemie {
 
         Point cible = chemin.get(etapeActuelle);
 
-        double cibleX = cible.y * TailleCase;
-        double cibleY = cible.x * TailleCase;
+        double cibleX = cible.y * Environnement.TailleCase;
+        double cibleY = cible.x * Environnement.TailleCase;
 
         double vitesseEffective = vitesse;
 

@@ -1,15 +1,13 @@
 package universite_paris8.iut.fabdelrahim.sae.modele.Tours;
 
-
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
-import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
-
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+
 import java.util.List;
 
-
-public class Tour {
+public abstract class Tour {
     protected IntegerProperty x;
     protected IntegerProperty y;
     protected int portee;
@@ -34,70 +32,53 @@ public class Tour {
         this.niveau = new SimpleIntegerProperty(1);
     }
 
-    // Appliquer l'amélioration des stats (Fusion des deux versions)
     public void ameliorer() {
         this.niveau.set(this.getNiveau() + 1);
-        this.degats = (int) (this.degats * 1.5);        
-        this.portee = (int) (this.portee * 1.15);       
-        this.vitesseTir = (int) (this.vitesseTir * 0.75); 
+        this.degats = (int) (this.degats * 1.5);
+        this.portee = (int) (this.portee * 1.15);
+        this.vitesseTir = (int) (this.vitesseTir * 0.75);
     }
-
 
     public int getPrixAmelioration() {
         // A chaque amélioration, le prix augmente de 100
         return this.type.getPrix() + 100 * getNiveau();
     }
 
-    public void attaquer(Environnement env) {
-        // Gestion du temps de recharge
+    // MÉTHODE PATRON : l'ordre des étapes est fixe, les sous-classes ne peuvent pas le changer
+    public final void attaquer(Environnement env) {
         if (this.cooldown > 0) {
             this.cooldown--;
             return;
         }
 
-        List<Enemie> listeZombies = env.getZombies();
-
-        // Recherche du premier zombie à portée de tir
-        for (int i = 0; i < listeZombies.size(); i++) {
-            Enemie zombie = listeZombies.get(i);
-
-            if (!zombie.estMort()) {
-                // Calcul de la distance entre le centre de la tour (36x36) et le centre du zombie (36x36)
-                double centreTourX = this.getX() + 18;
-                double centreTourY = this.getY() + 18;
-                double centreZombieX = zombie.getX() + 18;
-                double centreZombieY = zombie.getY() + 18;
-
-                double deltaX = centreTourX - centreZombieX;
-                double deltaY = centreTourY - centreZombieY;
-                double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-                // Si la cible est dans le rayon d'action
-                if (distance <= this.portee) {
-                    // Déclenche l'action de la tour (tir ou effet direct)
-                    this.gererActionTour(zombie, env);
-
-                    // Réinitialisation du temps de recharge
-                    this.cooldown = this.vitesseTir;
-
-                    // La tour s'arrête pour ce cycle après avoir trouvé sa cible
-                    break;
-                }
-            }
+        Enemie cible = this.trouverCible(env.getZombies());
+        if (cible != null) {
+            this.gererActionTour(cible, env);
+            this.cooldown = this.vitesseTir;
         }
     }
 
-    protected void gererActionTour(Enemie cible, Environnement env) {
-        // Par défaut : effet direct (pièges au sol). Les tours à projectiles redéfinissent cette méthode.
-        this.appliquerEffetImmediat(cible, env.getZombies());
+    // Étape commune : premier zombie vivant à portée
+    protected Enemie trouverCible(List<Enemie> zombies) {
+        for (Enemie z : zombies) {
+            if (!z.estMort() && this.estAPortee(z)) {
+                return z;
+            }
+        }
+        return null;
     }
 
-    // Comportement vide par défaut pour les tours à projectiles classiques
-    protected void appliquerEffetImmediat(Enemie cible, List<Enemie> listeZombies) {
+    // Étape commune : distance entre le centre de la tour (36x36) et celui du zombie (36x36)
+    protected boolean estAPortee(Enemie z) {
+        double dx = (this.getX() + 18) - (z.getX() + 18);
+        double dy = (this.getY() + 18) - (z.getY() + 18);
+        return Math.sqrt(dx * dx + dy * dy) <= this.portee;
     }
 
-    //Getters et Setters
+    // Étape qui change selon la tour : chaque sous-classe doit la définir
+    protected abstract void gererActionTour(Enemie cible, Environnement env);
 
+    // Getters et Setters
     public int getX() { return this.x.get(); }
     public int getY() { return this.y.get(); }
     public void setX(int x) { this.x.set(x); }
@@ -111,7 +92,6 @@ public class Tour {
     public int getNiveau() { return this.niveau.get(); }
     public IntegerProperty niveauProperty() { return this.niveau; }
 
-    // Ajout indispensable pour l'objet Rouleau (bonus de dégâts)
-    public int getDegats(){ return this.degats; }
-    public void setDegats(int degats){ this.degats = degats; }
+    public int getDegats() { return this.degats; }
+    public void setDegats(int degats) { this.degats = degats; }
 }

@@ -9,6 +9,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
+import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
 import universite_paris8.iut.fabdelrahim.sae.modele.Objet;
 import universite_paris8.iut.fabdelrahim.sae.modele.Projectiles.Projectile;
 import universite_paris8.iut.fabdelrahim.sae.modele.Tours.Tour;
@@ -84,8 +85,8 @@ public class EntiteVue {
         if (img == null) return null;
 
         ImageView imageView = new ImageView(img);
-        imageView.setFitWidth(36);
-        imageView.setFitHeight(36);
+        imageView.setFitWidth(Environnement.TailleCase);
+        imageView.setFitHeight(Environnement.TailleCase);
         imageView.setId(idUnique);
 
         return imageView;
@@ -141,8 +142,8 @@ public class EntiteVue {
         if (img == null) return null;
 
         ImageView imageComptoir = new ImageView(img);
-        imageComptoir.setFitWidth(36);
-        imageComptoir.setFitHeight(36);
+        imageComptoir.setFitWidth(Environnement.TailleCase);
+        imageComptoir.setFitHeight(Environnement.TailleCase);
         imageComptoir.setLayoutX(x);
         imageComptoir.setLayoutY(y);
 
@@ -154,8 +155,8 @@ public class EntiteVue {
         if (img == null) return;
 
         ImageView imageComptoir = new ImageView(img);
-        imageComptoir.setFitWidth(36);
-        imageComptoir.setFitHeight(36);
+        imageComptoir.setFitWidth(Environnement.TailleCase);
+        imageComptoir.setFitHeight(Environnement.TailleCase);
         imageComptoir.setLayoutX(x);
         imageComptoir.setLayoutY(y);
 

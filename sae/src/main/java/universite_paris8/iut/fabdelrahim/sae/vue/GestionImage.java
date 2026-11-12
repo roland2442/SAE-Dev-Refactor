@@ -33,7 +33,13 @@ public class GestionImage {
         return sprites.get(key);
     }
 
+    // C'est la vue qui sait quelle image correspond à quel type de tour
     public static Image getImage(TypeTour type) {
-        return sprites.get(type.getCleImage());
+        switch (type) {
+            case LANCE_BURGER: return sprites.get("LanceBurger");
+            case MITRAILLETTE_FRITE: return sprites.get("MitrailletteFrite");
+            case BAC_GLACE: return sprites.get("BacGlace");
+            default: return sprites.get("Barbecue");
+        }
     }
 }

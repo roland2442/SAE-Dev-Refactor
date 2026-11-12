@@ -8,7 +8,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.ImageView;
@@ -28,6 +27,7 @@ import universite_paris8.iut.fabdelrahim.sae.vue.TerrainVue;
 import universite_paris8.iut.fabdelrahim.sae.vue.EntiteVue;
 import universite_paris8.iut.fabdelrahim.sae.vue.GestionImage;
 import universite_paris8.iut.fabdelrahim.sae.modele.Tours.TypeTour;
+
 
 import java.io.IOException;
 import java.net.URL;
@@ -58,6 +58,7 @@ public class Controller implements Initializable {
     private Environnement env;
     private ActionJoueur action = ActionJoueur.AUCUNE;
     private TypeTour tourChoisie = null;
+    private static final String CHEMIN_FXML = "/universite_paris8/iut/fabdelrahim/sae/";
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -69,8 +70,8 @@ public class Controller implements Initializable {
         this.terrainVue = new TerrainVue(env.getTerrain(), map);
         this.terrainVue.creerTerrain();
 
-        this.panneauJeu.setPrefWidth(1152);
-        this.panneauJeu.setPrefHeight(756);
+        this.panneauJeu.setPrefWidth(env.getTerrain().getNbColonnes() * Environnement.TailleCase);
+        this.panneauJeu.setPrefHeight(env.getTerrain().getNbLignes() * Environnement.TailleCase);
 
         this.initJeu();
     }
@@ -107,12 +108,12 @@ public class Controller implements Initializable {
             this.labelVague.textProperty().bind(env.numeroVagueProperty().asString("Vague : %d"));
         }
         if (this.env.getBase() != null && this.pv != null) {
-            this.pv.progressProperty().bind(this.env.getBase().hpProperty().divide(100.0));
+            this.pv.progressProperty().bind(this.env.getBase().hpProperty().divide((double) this.env.getBase().getHpMax()));
         }
 
         // Configuration Jauge Bonus
         if (this.env != null && this.barrebonus != null && this.bonuseffet != null) {
-            this.barrebonus.progressProperty().bind(this.env.tempsbonusProperty().divide(600.0));
+            this.barrebonus.progressProperty().bind(this.env.tempsbonusProperty().divide((double) Objet.DUREE_BONUS));
             this.bonuseffet.setVisible(false);
 
             this.env.tempsbonusProperty().addListener((observable, ancienneValeur, nouvelleval) -> {
@@ -262,43 +263,9 @@ public class Controller implements Initializable {
         }
     }
 
-    @FXML
-    public void reglage(ActionEvent event) throws IOException {
-        if (gameLoop != null) gameLoop.stop();
 
-        Stage stage = new Stage();
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/universite_paris8/iut/fabdelrahim/sae/reglage.fxml"));
-        Scene scene = new Scene(fxmlLoader.load());
-        stage.setScene(scene);
-        stage.show();
-    }
 
-    @FXML
-    public void aide(ActionEvent event) {
-        try {
-            Button boutonClique = (Button) event.getSource();
 
-            if (boutonClique.getId() != null && boutonClique.getId().equals("nextBtn")) {
-                Stage stageAide = (Stage) boutonClique.getScene().getWindow();
-                if (stageAide != null) {
-                    stageAide.close();
-                }
-                this.lancerJeu(null);
-            } else {
-                if (gameLoop != null) gameLoop.pause();
-
-                Stage stage = new Stage();
-                stage.setTitle("Pizzattack - L'Histoire & Règles");
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/universite_paris8/iut/fabdelrahim/sae/aide.fxml"));
-                Scene scene = new Scene(fxmlLoader.load());
-                stage.setScene(scene);
-                stage.show();
-            }
-        } catch (IOException e) {
-            System.err.println("Erreur de chargement de aide.fxml");
-            e.printStackTrace();
-        }
-    }
 
     @FXML
     public void clicBoutonMitrailletteFrite(ActionEvent event) { choisirTour(TypeTour.MITRAILLETTE_FRITE); }
@@ -336,13 +303,14 @@ public class Controller implements Initializable {
     public void clicSurTerrain(MouseEvent event) {
         if (this.action == ActionJoueur.AUCUNE) return;
 
-        int xAjuste = ((int) event.getX() / 36) * 36;
-        int yAjuste = ((int) event.getY() / 36) * 36;
+        // Le modèle se charge de ramener le clic à la bonne case
+        int x = (int) event.getX();
+        int y = (int) event.getY();
 
         switch (this.action) {
-            case VENDRE -> this.env.vendreTour(xAjuste, yAjuste);
-            case AMELIORER -> this.env.ameliorerTour(xAjuste, yAjuste);
-            case POSER -> this.env.ajouterTour(xAjuste, yAjuste, this.tourChoisie);
+            case VENDRE -> this.env.vendreTour(x, y);
+            case AMELIORER -> this.env.ameliorerTour(x, y);
+            case POSER -> this.env.ajouterTour(x, y, this.tourChoisie);
             default -> { }
         }
 
@@ -360,5 +328,35 @@ public class Controller implements Initializable {
     private void afficherVictoire() {
         this.gameLoop.stop();
         this.ecranVue.afficherVictoire();
+    }
+
+
+    // Une seule méthode pour ouvrir une fenêtre, utilisée par reglage() et aide()
+    private <T> T ouvrirFenetre(String fichierFxml, String titre) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(CHEMIN_FXML + fichierFxml));
+        Scene scene = new Scene(fxmlLoader.load());
+
+        Stage stage = new Stage();
+        stage.setTitle(titre);
+        stage.setScene(scene);
+        stage.show();
+
+        return fxmlLoader.getController();
+    }
+
+    @FXML
+    public void reglage(ActionEvent event) throws IOException {
+        if (gameLoop != null) gameLoop.stop();
+
+        reglageController fenetre = ouvrirFenetre("reglage.fxml", "Pizzattack - Réglages");
+        fenetre.setActions(() -> lancerJeu(null), () -> recommencerJeu(null));
+    }
+
+    @FXML
+    public void aide(ActionEvent event) throws IOException {
+        if (gameLoop != null) gameLoop.pause();
+
+        AideController fenetre = ouvrirFenetre("aide.fxml", "Pizzattack - L'Histoire & Règles");
+        fenetre.setActionFermeture(() -> lancerJeu(null));
     }
 }
