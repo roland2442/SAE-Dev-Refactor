@@ -7,7 +7,7 @@
 
 <StackPane xmlns="http://javafx.com/javafx/17"
            xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="universite_paris8.iut.fabdelrahim.sae.controller.Controller"
+           fx:controller="universite_paris8.iut.fabdelrahim.sae.controller.AideController"
            prefWidth="1377"
            prefHeight="856"
            style="-fx-background-color: linear-gradient(to bottom right, #200508, #0f0203, #2a0a0e);">
@@ -142,7 +142,7 @@
 
         <Button fx:id="nextBtn"
                 text="OUVRIR LE RESTAURANT"
-                onAction="#aide"
+                onAction="#fermer"
                 style="-fx-font-size: 20px; -fx-font-weight: 900; -fx-text-fill: #0f0203; -fx-padding: 18px 80px; -fx-cursor: hand; -fx-background-radius: 10px;
                        -fx-background-color: ${nextBtn.hover ? '#ff8c00' : '#e87800'};
                        -fx-scale-x: ${nextBtn.hover ? 1.03 : 1.0};

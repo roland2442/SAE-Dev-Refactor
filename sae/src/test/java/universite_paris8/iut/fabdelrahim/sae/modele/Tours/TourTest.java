@@ -3,7 +3,7 @@ package universite_paris8.iut.fabdelrahim.sae.modele.Tours;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.ZombieNormal;
 import universite_paris8.iut.fabdelrahim.sae.modele.Projectiles.Burger;
 
@@ -18,9 +18,10 @@ class TourTest {
 
     @BeforeEach
     void setUp() {
-        tourBurger = new Tour(0, 0, 50, 20, 10, "LanceBurger");
-        tourFrite = new Tour(10, 10, 30, 5, 2, "MitrailletteFrite");
-        tourGlace = new Tour(0, 0, 40, 0, 15, "BacGlace");
+        // Tour est abstraite : on teste les vraies tours du jeu
+        tourBurger = new LanceBurger(0, 0);          // portée 180, dégâts 15, tir toutes les 60
+        tourFrite = new MitrailletteFrite(10, 10);
+        tourGlace = new BacGlace(0, 0);
 
         env = new Environnement();
         env.getZombies().clear();
@@ -30,14 +31,14 @@ class TourTest {
     @Test
     void testAmeliorer() {
         assertEquals(1, tourBurger.getNiveau());
-        assertEquals(20, tourBurger.degats);
-        assertEquals(10, tourBurger.vitesseTir);
+        assertEquals(15, tourBurger.degats);
+        assertEquals(60, tourBurger.vitesseTir);
 
         tourBurger.ameliorer();
 
         assertEquals(2, tourBurger.getNiveau());
-        assertEquals(30, tourBurger.degats);
-        assertEquals(7, tourBurger.vitesseTir);
+        assertEquals(22, tourBurger.degats);      // 15 * 1.5
+        assertEquals(45, tourBurger.vitesseTir);  // 60 * 0.75
     }
 
     @Test
@@ -52,20 +53,20 @@ class TourTest {
 
     @Test
     void testAttaquerCibleAPortee() {
-        Enemie zombie = new ZombieNormal(20, 20);
+        Enemi zombie = new ZombieNormal(20, 20);
         env.getZombies().add(zombie);
 
         assertEquals(0, tourBurger.cooldown);
         tourBurger.attaquer(env);
 
-        assertEquals(10, tourBurger.cooldown);
+        assertEquals(tourBurger.vitesseTir, tourBurger.cooldown);
         assertEquals(1, env.getProjectiles().size());
         assertInstanceOf(Burger.class, env.getProjectiles().get(0));
     }
 
     @Test
     void testAttaquerCibleHorsPortee() {
-        Enemie zombie = new ZombieNormal(100, 100);
+        Enemi zombie = new ZombieNormal(300, 300);   // plus loin que la portée du lance-burger
         env.getZombies().add(zombie);
 
         tourBurger.attaquer(env);
@@ -76,21 +77,21 @@ class TourTest {
 
     @Test
     void testAttaquerSousCooldown() {
-        Enemie zombie = new ZombieNormal(20, 20);
+        Enemi zombie = new ZombieNormal(20, 20);
         env.getZombies().add(zombie);
 
         tourBurger.attaquer(env);
-        assertEquals(10, tourBurger.cooldown);
+        assertEquals(tourBurger.vitesseTir, tourBurger.cooldown);
         int nbProjectilesApresTir1 = env.getProjectiles().size();
 
         tourBurger.attaquer(env);
-        assertEquals(9, tourBurger.cooldown);
+        assertEquals(tourBurger.vitesseTir - 1, tourBurger.cooldown);
         assertEquals(nbProjectilesApresTir1, env.getProjectiles().size());
     }
 
     @Test
     void testAttaquerZombieMort() {
-        Enemie zombieMort = new ZombieMort(20, 20);
+        Enemi zombieMort = new ZombieMort(20, 20);
         env.getZombies().add(zombieMort);
 
         tourBurger.attaquer(env);
@@ -101,7 +102,7 @@ class TourTest {
 
     @Test
     void testIdUniqueDifferent() {
-        Tour autreTour = new Tour(0, 0, 50, 20, 10, "LanceBurger");
+        Tour autreTour = new LanceBurger(0, 0);
         assertNotEquals(tourBurger.getIdUnique(), autreTour.getIdUnique());
     }
 

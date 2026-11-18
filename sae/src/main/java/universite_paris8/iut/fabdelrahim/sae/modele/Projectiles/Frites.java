@@ -1,10 +1,10 @@
 package universite_paris8.iut.fabdelrahim.sae.modele.Projectiles;
 
 import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 
 public class Frites extends Projectile {
-    public Frites(double startX, double startY, Enemie cible) {
+    public Frites(double startX, double startY, Enemi cible) {
         super(startX, startY, 9, 4, cible, "Frite"); // Vitesse 9, dégâts 4
     }
 

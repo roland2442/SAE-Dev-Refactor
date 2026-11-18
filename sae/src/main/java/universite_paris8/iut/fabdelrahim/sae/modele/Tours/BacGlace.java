@@ -1,6 +1,6 @@
 package universite_paris8.iut.fabdelrahim.sae.modele.Tours;
 
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 
 public class BacGlace extends TourZone {
 
@@ -9,7 +9,7 @@ public class BacGlace extends TourZone {
     }
 
     @Override
-    protected void appliquerSurZombie(Enemie z) {
+    protected void appliquerSurZombie(Enemi z) {
         z.ralentissement();
     }
 }

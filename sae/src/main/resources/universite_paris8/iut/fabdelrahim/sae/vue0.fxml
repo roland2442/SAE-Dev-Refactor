@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<BorderPane prefHeight="856.0" prefWidth="1377.0" styleClass="root" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="universite_paris8.iut.fabdelrahim.sae.controller.Controller">
+<BorderPane prefHeight="856.0" prefWidth="1377.0" styleClass="root" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="universite_paris8.iut.fabdelrahim.sae.controller.JeuController">
 
     <stylesheets>
         <URL value="@Style.css" />

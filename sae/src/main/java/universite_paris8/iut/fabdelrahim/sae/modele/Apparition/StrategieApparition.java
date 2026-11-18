@@ -1,6 +1,6 @@
 package universite_paris8.iut.fabdelrahim.sae.modele.Apparition;
 
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 
 /**
  * Une façon de choisir le zombie qui apparaît. Chaque palier de difficulté a sa propre stratégie.
@@ -8,5 +8,5 @@ import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
  */
 public interface StrategieApparition {
 
-    Enemie creerZombie(int x, int y, int zombiesRestants, double hasard);
+    Enemi creerZombie(int x, int y, int zombiesRestants, double hasard);
 }

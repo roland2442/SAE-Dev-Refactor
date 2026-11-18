@@ -5,8 +5,9 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Slider;
 import javafx.stage.Stage;
+import universite_paris8.iut.fabdelrahim.sae.vue.GestionSon;
 
-public class reglageController {
+public class ReglageController {
 
     @FXML
     private Slider volume;

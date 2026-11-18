@@ -1,11 +1,11 @@
 package universite_paris8.iut.fabdelrahim.sae.modele.Projectiles;
 
 import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 
 public class Burger extends Projectile {
 
-    public Burger(double startX, double startY, Enemie cible) {
+    public Burger(double startX, double startY, Enemi cible) {
         super(startX, startY, 5, 15, cible, "Burger");
     }
 
@@ -18,7 +18,7 @@ public class Burger extends Projectile {
         double impactY = this.getY();
 
         // on parcourt TOUS les zombies du jeu pour voir qui est touché par l'explosion
-        for (Enemie z : env.getZombies()) {
+        for (Enemi z : env.getZombies()) {
 
             if (!z.estMort()) {
                 //Calcul de la distance entre l'explosion et ce zombie précis (Théorème de Pythagore)

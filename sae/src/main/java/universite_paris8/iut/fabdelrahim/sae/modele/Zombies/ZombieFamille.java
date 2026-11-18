@@ -5,7 +5,7 @@ import universite_paris8.iut.fabdelrahim.sae.modele.Chemin.Point;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ZombieFamille extends Enemie {
+public class ZombieFamille extends Enemi {
 
     private static final int nbEnfants = 4;
     // Flag pour éviter les doubles triggers si la méthode est appelée plusieurs fois par cycle
@@ -20,8 +20,8 @@ public class ZombieFamille extends Enemie {
     //Méthode appelée à la mort du zombie pour diviser l'entité en 4 sous-zombies.
     //Les enfants récupèrent le chemin exact et l'état d'avancement (étape) du parent.
 
-    public List<Enemie> genererEnfants(List<Point> chemin, int etapeParent) {
-        List<Enemie> enfants = new ArrayList<>();
+    public List<Enemi> genererEnfants(List<Point> chemin, int etapeParent) {
+        List<Enemi> enfants = new ArrayList<>();
 
         // ne spawn rien si le zombie est vivant ou si il a deja eu les enfants a déjà eu lieu
         if (!this.estMort() || this.enfantsGeneres) {

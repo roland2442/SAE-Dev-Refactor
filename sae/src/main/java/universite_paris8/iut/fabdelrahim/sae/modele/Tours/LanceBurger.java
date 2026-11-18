@@ -2,7 +2,7 @@ package universite_paris8.iut.fabdelrahim.sae.modele.Tours;
 
 import universite_paris8.iut.fabdelrahim.sae.modele.Projectiles.Burger;
 import universite_paris8.iut.fabdelrahim.sae.modele.Projectiles.Projectile;
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 
 public class LanceBurger extends TourProjectile {
 
@@ -11,7 +11,7 @@ public class LanceBurger extends TourProjectile {
     }
 
     @Override
-    protected Projectile creerProjectile(double departX, double departY, Enemie cible) {
+    protected Projectile creerProjectile(double departX, double departY, Enemi cible) {
         Burger b = new Burger(departX, departY, cible);
         b.setDegats(this.degats);
         return b;

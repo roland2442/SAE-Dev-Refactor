@@ -21,7 +21,7 @@ import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
 import universite_paris8.iut.fabdelrahim.sae.modele.Objet;
 import universite_paris8.iut.fabdelrahim.sae.modele.Projectiles.Projectile;
 import universite_paris8.iut.fabdelrahim.sae.modele.Tours.Tour;
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 import universite_paris8.iut.fabdelrahim.sae.vue.EcranVue;
 import universite_paris8.iut.fabdelrahim.sae.vue.TerrainVue;
 import universite_paris8.iut.fabdelrahim.sae.vue.EntiteVue;
@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class Controller implements Initializable {
+public class JeuController implements Initializable {
 
     @FXML private TilePane map;
     @FXML private Pane panneauJeu;
@@ -90,6 +90,7 @@ public class Controller implements Initializable {
         );
 
         this.initEcouteurs();
+        this.initBindingsUI();//nouvelle methode
 
         // Affichage du comptoir délégué à EntiteVue
         if (this.env.getBase() != null) {
@@ -99,7 +100,11 @@ public class Controller implements Initializable {
                     this.env.getBase().getY()
             );
         }
+        this.initAnimation();
+    }
 
+    //nouvelle pour decouper initJeu, on fais que les binding ici
+    private void initBindingsUI() {
         // Bindings UI
         if (this.labelArgent != null) {
             this.labelArgent.textProperty().bind(env.argentProperty().asString(" : %d"));
@@ -120,9 +125,8 @@ public class Controller implements Initializable {
                 this.bonuseffet.setVisible((int) nouvelleval > 0);
             });
         }
-
-        this.initAnimation();
     }
+
 
     // Configuration de l'affichage dynamique : c'est le modèle qui prévient, le contrôleur ne surveille plus
     private void initEcouteurs() {
@@ -136,10 +140,10 @@ public class Controller implements Initializable {
 
     // Affichage dynamique des entités : le contrôleur prévient la vue, c'est elle qui affiche
     private void initAffichageZombies() {
-        this.env.getZombies().addListener((ListChangeListener<Enemie>) change -> {
+        this.env.getZombies().addListener((ListChangeListener<Enemi>) change -> {
             while (change.next()) {
-                for (Enemie zombie : change.getAddedSubList()) this.entiteVue.ajouterZombie(zombie);
-                for (Enemie zombie : change.getRemoved()) this.entiteVue.retirer(zombie.getIdUnique());
+                for (Enemi zombie : change.getAddedSubList()) this.entiteVue.ajouterZombie(zombie);
+                for (Enemi zombie : change.getRemoved()) this.entiteVue.retirer(zombie.getIdUnique());
             }
         });
     }
@@ -348,7 +352,7 @@ public class Controller implements Initializable {
     public void reglage(ActionEvent event) throws IOException {
         if (gameLoop != null) gameLoop.stop();
 
-        reglageController fenetre = ouvrirFenetre("reglage.fxml", "Pizzattack - Réglages");
+        ReglageController fenetre = ouvrirFenetre("reglage.fxml", "Pizzattack - Réglages");
         fenetre.setActions(() -> lancerJeu(null), () -> recommencerJeu(null));
     }
 

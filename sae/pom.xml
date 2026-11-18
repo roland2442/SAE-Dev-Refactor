@@ -65,7 +65,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                universite_paris8.iut.fabdelrahim.sae/universite_paris8.iut.fabdelrahim.sae.HelloApplication
+                                universite_paris8.iut.fabdelrahim.sae/universite_paris8.iut.fabdelrahim.sae.Pizzattackapplication
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

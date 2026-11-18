@@ -2,7 +2,7 @@ package universite_paris8.iut.fabdelrahim.sae.modele.Chemin;
 
 public class Terrain {
 
-    private int[][] grille = {
+    private final int[][] grille = {
 
             {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 50, 50, 50},
             {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 50, 50, 50},

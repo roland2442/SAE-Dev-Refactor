@@ -1,7 +1,7 @@
 package universite_paris8.iut.fabdelrahim.sae.modele.Tours;
 
 import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 
 public abstract class TourZone extends Tour {
 
@@ -10,8 +10,8 @@ public abstract class TourZone extends Tour {
     }
 
     @Override
-    protected final void gererActionTour(Enemie cible, Environnement env) {
-        for (Enemie z : env.getZombies()) {
+    protected final void gererActionTour(Enemi cible, Environnement env) {
+        for (Enemi z : env.getZombies()) {
             if (!z.estMort() && this.estAPortee(z)) {
                 this.appliquerSurZombie(z);
             }
@@ -19,5 +19,5 @@ public abstract class TourZone extends Tour {
     }
 
     // Seule étape propre à chaque piège : l'effet sur un zombie à portée
-    protected abstract void appliquerSurZombie(Enemie z);
+    protected abstract void appliquerSurZombie(Enemi z);
 }

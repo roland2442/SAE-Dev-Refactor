@@ -3,7 +3,7 @@ package universite_paris8.iut.fabdelrahim.sae.modele.Tours;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import universite_paris8.iut.fabdelrahim.sae.modele.Environnement;
-import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemie;
+import universite_paris8.iut.fabdelrahim.sae.modele.Zombies.Enemi;
 
 import java.util.List;
 
@@ -51,7 +51,7 @@ public abstract class Tour {
             return;
         }
 
-        Enemie cible = this.trouverCible(env.getZombies());
+        Enemi cible = this.trouverCible(env.getZombies());
         if (cible != null) {
             this.gererActionTour(cible, env);
             this.cooldown = this.vitesseTir;
@@ -59,8 +59,8 @@ public abstract class Tour {
     }
 
     // Étape commune : premier zombie vivant à portée
-    protected Enemie trouverCible(List<Enemie> zombies) {
-        for (Enemie z : zombies) {
+    protected Enemi trouverCible(List<Enemi> zombies) {
+        for (Enemi z : zombies) {
             if (!z.estMort() && this.estAPortee(z)) {
                 return z;
             }
@@ -69,14 +69,14 @@ public abstract class Tour {
     }
 
     // Étape commune : distance entre le centre de la tour (36x36) et celui du zombie (36x36)
-    protected boolean estAPortee(Enemie z) {
+    protected boolean estAPortee(Enemi z) {
         double dx = (this.getX() + 18) - (z.getX() + 18);
         double dy = (this.getY() + 18) - (z.getY() + 18);
         return Math.sqrt(dx * dx + dy * dy) <= this.portee;
     }
 
     // Étape qui change selon la tour : chaque sous-classe doit la définir
-    protected abstract void gererActionTour(Enemie cible, Environnement env);
+    protected abstract void gererActionTour(Enemi cible, Environnement env);
 
     // Getters et Setters
     public int getX() { return this.x.get(); }
